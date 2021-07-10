@@ -1,11 +1,45 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+<div id="app">
+  <section class="hero is-info">
+    <div class="hero-body">
+      <p class="title">
+        RCON Web
+      </p>
+      <p class="subtitle">
+        Info subtitle
+      </p>
     </div>
-    <router-view/>
+  </section>
+
+  <div class="columns">
+    <div class="column is-2" >
+      <div class="box">
+        <aside class="menu">
+          <p class="menu-label">
+            General
+          </p>
+          <ul class="menu-list">
+            <li><a>Dashboard</a></li>
+            <li><a>Server Management</a></li>
+            <li><a>Settings</a></li>
+          </ul>
+          <p class="menu-label">
+            Servers
+          </p>
+          <ul class="menu-list">
+            <li><a>Server 1</a></li>
+            <li><a>Server 2</a></li>
+            <li><a>Server 3</a></li>
+            <li><a>Server 4</a></li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+    <div class="column">
+
+    </div>
   </div>
+</div>
 </template>
 
 <style>
@@ -13,7 +47,6 @@
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
 }
 
