@@ -18,18 +18,22 @@
     </hero-bar>
     <section class="section is-main-section">
       <tiles>
-        <profile-update-form class="tile is-child" />
-        <card-component title="Profile" icon="account" class="tile is-child">
-          <user-avatar class="image has-max-width is-aligned-center" />
-          <hr />
-          <b-field label="Name">
-            <b-input :value="userName" custom-class="is-static" readonly />
-          </b-field>
-          <hr />
-          <b-field label="E-mail">
-            <b-input :value="userEmail" custom-class="is-static" readonly />
-          </b-field>
-        </card-component>
+          <card-component title="Console" icon="console" class="tile is-child" contentClass="px-0 py-0">
+            <console class="tile is-child" :lines="serverLines" />
+            <div class="buttons px-3 pb-3 pt-1">
+              <b-button icon-left="refresh" type="is-info">Restart</b-button>
+            </div>
+          </card-component>
+          <card-component title="Server Information" icon="information" class="tile is-child">
+            <hr />
+            <b-field label="Name">
+              <b-input :value="userName" custom-class="is-static" readonly />
+            </b-field>
+            <hr />
+            <b-field label="E-mail">
+              <b-input :value="userEmail" custom-class="is-static" readonly />
+            </b-field>
+          </card-component>
       </tiles>
       <password-update-form />
     </section>
@@ -39,20 +43,32 @@
 <script>
 import { mapState } from 'vuex'
 import CardComponent from '@/components/CardComponent'
-import ProfileUpdateForm from '@/components/ProfileUpdateForm'
 import PasswordUpdateForm from '@/components/PasswordUpdateForm'
 import Tiles from '@/components/Tiles'
-import UserAvatar from '@/components/UserAvatar'
 import HeroBar from '@/components/HeroBar'
+import Console from '@/components/Console'
 export default {
-  name: 'Profile',
+  name: 'Server',
   components: {
-    UserAvatar,
     HeroBar,
     Tiles,
     PasswordUpdateForm,
-    ProfileUpdateForm,
-    CardComponent
+    CardComponent,
+    Console
+  },
+  data() {
+    return {
+      serverLines: [
+        "[SM] Changed cvar &quot;sv_maxupdaterate&quot; to &quot;100&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sv_maxupdaterate&quot;) (value &quot;100&quot;)",
+        "[SM] Changed cvar &quot;sv_maxcmdrate&quot; to &quot;100&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sv_maxcmdrate&quot;) (value &quot;100&quot;)",
+        "[SM] Changed cvar &quot;survivor_stun_immunity_duration&quot; to &quot;20&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;survivor_stun_immunity_duration&quot;) (value &quot;20&quot;)",
+        "[SM] Changed cvar &quot;sb_friend_immobilized_reaction_time_hard&quot; to &quot;0.1&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sb_friend_immobilized_reaction_time_hard&quot;) (value &quot;0.1&quot;)",
+        "[SM] Changed cvar &quot;sb_friend_immobilized_reaction_time_expert&quot; to &quot;0.1&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sb_friend_immobilized_reaction_time_expert&quot;) (value &quot;0.1&quot;)",
+        "[SM] Changed cvar &quot;sb_sidestep_for_horde&quot; to &quot;1&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sb_sidestep_for_horde&quot;) (value &quot;1&quot;)",
+        "[SM] Changed cvar &quot;sb_path_lookahead_range&quot; to &quot;350&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sb_path_lookahead_range&quot;) (value &quot;350&quot;)",
+        "Unknown command &quot;sm_spawnweapon_debug&quot;"
+      ]
+    }
   },
   computed: {
     titleStack () {

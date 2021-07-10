@@ -7,14 +7,14 @@
           class="tile is-child"
           type="is-primary"
           icon="server"
-          :number="4"
+          :number="serversOnline"
           label="Servers Online"
         />
         <card-widget
           class="tile is-child"
           type="is-info"
           icon="account-group"
-          :number="0"
+          :number="onlinePlayers"
           label="Players"
         />
         <card-widget
@@ -35,7 +35,7 @@
         @header-icon-click="refreshServers"
       >
         <servers-table ref="servers"
-          :data-url="`${$router.options.base}data-sources/servers.json`"
+          :servers="servers.list" :isLoading="servers.loading"
         />
       </card-component>
 
@@ -79,16 +79,27 @@ export default {
       defaultChart: {
         chartData: null,
         extraOptions: chartConfig.chartOptionsMain
+      },
+      servers: {
+        list: [],
+        loading: false
       }
     }
   },
   computed: {
     titleStack () {
       return ['Dashboard']
+    },
+    serversOnline() {
+      return this.servers.list.filter(a => a.status).length
+    },
+    onlinePlayers() {
+      return this.servers.list.reduce((a, c) => a + c.players.length, 0)
     }
   },
   mounted () {
     this.fillChartData()
+    this.refreshServers()
 
     this.$buefy.snackbar.open({
       message: 'Welcome back',
@@ -97,7 +108,11 @@ export default {
   },
   methods: {
     refreshServers() {
-      this.$refs.servers.refresh()
+      this.servers.loading = true
+      fetch(`${this.$router.options.base}data-sources/servers.json`)
+        .then(res => res.json())
+        .then(json => this.servers.list = json.data)
+        .finally(() => this.servers.loading = false)
     },
     randomChartData (n) {
       const data = []

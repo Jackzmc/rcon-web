@@ -15,7 +15,7 @@
         <b-icon :icon="headerIcon" custom-size="default" />
       </a>
     </header>
-    <div class="card-content">
+    <div :class="['card-content', ...contentClass]">
       <slot />
     </div>
   </div>
@@ -36,6 +36,9 @@ export default {
     headerIcon: {
       type: String,
       default: null
+    },
+    contentClass: {
+      type: Array
     }
   },
   methods: {

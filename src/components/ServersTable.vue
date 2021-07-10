@@ -76,14 +76,19 @@ export default {
     checkable: {
       type: Boolean,
       default: false
+    },
+    servers: {
+      type: Array
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
     return {
       isModalActive: false,
       trashObject: null,
-      servers: [],
-      isLoading: false,
       paginated: false,
       perPage: 10,
       checkedRows: []
@@ -98,17 +103,7 @@ export default {
       return null
     }
   },
-  mounted () {
-    this.refresh()
-  },
   methods: {
-    refresh() {
-      this.isLoading = true
-      fetch(this.dataUrl)
-        .then(res => res.json())
-        .then(json => this.servers = json.data)
-        .finally(() => this.isLoading = false)
-    },
     sortStatus(a, b, ascending) {
       if (ascending) {
         if (a.status && !b.status) return -1
