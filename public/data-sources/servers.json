@@ -1,0 +1,25 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "Server a",
+            "status": false,
+            "players": [],
+            "created": "Dec 1, 2021"
+        },
+        {
+            "id": 2,
+            "name": "Server 2",
+            "status": false,
+            "players": [],
+            "created": "Jan 25, 2020"
+        },
+        {
+            "id": 3,
+            "name": "Server 3",
+            "status": true,
+            "players": [1],
+            "created": "Jan 21, 2005"
+        }
+    ]
+}

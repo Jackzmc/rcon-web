@@ -1,65 +1,63 @@
 <template>
-<div id="app">
-  <section class="hero is-info">
-    <div class="hero-body">
-      <p class="title">
-        RCON Web
-      </p>
-      <p class="subtitle">
-        Info subtitle
-      </p>
-    </div>
-  </section>
-
-  <div class="columns">
-    <div class="column is-2" >
-      <div class="box">
-        <aside class="menu">
-          <p class="menu-label">
-            General
-          </p>
-          <ul class="menu-list">
-            <li><a>Dashboard</a></li>
-            <li><a>Server Management</a></li>
-            <li><a>Settings</a></li>
-          </ul>
-          <p class="menu-label">
-            Servers
-          </p>
-          <ul class="menu-list">
-            <li><a>Server 1</a></li>
-            <li><a>Server 2</a></li>
-            <li><a>Server 3</a></li>
-            <li><a>Server 4</a></li>
-          </ul>
-        </aside>
-      </div>
-    </div>
-    <div class="column">
-
-    </div>
+  <div id="app">
+    <nav-bar />
+    <aside-menu :menu="menu" />
+    <router-view />
   </div>
-</div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-}
+<script>
+// @ is an alias to /src
+import NavBar from '@/components/NavBar'
+import AsideMenu from '@/components/AsideMenu'
 
-#nav {
-  padding: 30px;
+export default {
+  name: 'App',
+  components: {
+    AsideMenu,
+    NavBar
+  },
+  computed: {
+    menu () {
+      return {
+        General: [
+          {
+            to: '/',
+            icon: 'desktop-mac',
+            label: 'Dashboard'
+          },
+          {
+            to: '/management',
+            icon: 'database',
+            label: 'Server Management'
+          },
+          {
+            to: '/settings',
+            icon: 'settings',
+            label: 'Settings'
+          }
+        ],
+        Servers: [
+          {
+            to: '/server/a',
+            icon: 'server',
+            label: 'Server 1'
+          },
+          {
+            to: '/server/2',
+            icon: 'server',
+            label: 'Server 2'
+          }
+        ]
+      }
+    }
+  },
+  created () {
+    this.$store.commit('user', {
+      name: 'John Doe',
+      email: 'john@example.com',
+      avatar: 'https://avatars.dicebear.com/v2/gridy/John-Doe.svg'
+    })
+  }
 }
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+</script>
