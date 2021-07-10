@@ -1,7 +1,7 @@
 <template>
 <div>
   <ul class="box has-background-black has-text-white console">
-    <li v-for="line in lines" :key="line">
+    <li v-for="(line,i) in lines" :key="i">
       {{line}}
     </li>
   </ul>

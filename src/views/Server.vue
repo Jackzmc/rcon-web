@@ -1,7 +1,15 @@
 <template>
   <div>
     <hero-bar>
-      Server {{$route.params.server}}
+      {{server.name}}
+      <p class="subtitle is-6" v-if="server.status">
+        <span class="has-text-success">Online</span>
+        <span> - {{server.players.length}} players online</span>
+        <span> - 50 days uptime</span>
+      </p>
+      <p class="subtitle is-6" v-else>
+        <span class="has-text-danger">Offline</span>
+      </p>
       <div class="buttons" slot="right">
         <b-button tag="router-link" slot="right" type="is-warning" icon-left="lead-pencil"
           :to="'/server/' + $route.params.server + '/edit'"
@@ -14,28 +22,32 @@
           Delete
         </b-button>
       </div>
-
     </hero-bar>
     <section class="section is-main-section">
-      <tiles>
-          <card-component title="Console" icon="console" class="tile is-child" contentClass="px-0 py-0">
-            <console class="tile is-child" :lines="serverLines" />
+      <div class="columns">
+        <div class="column">
+          <card-component title="Console" icon="console" contentClass="px-0 py-0">
+            <console :lines="serverLines" />
             <div class="buttons px-3 pb-3 pt-1">
               <b-button icon-left="refresh" type="is-info">Restart</b-button>
             </div>
           </card-component>
-          <card-component title="Server Information" icon="information" class="tile is-child">
+        </div>
+        <div class="column is-4">
+          <card-component title="Server Information" icon="information" >
+            <h5 class="title is-5">{{server.name}}</h5>
+            <p class="subtitle is-6">{{server.meta.ip}}:{{server.meta.port}}</p>
             <hr />
-            <b-field label="Name">
-              <b-input :value="userName" custom-class="is-static" readonly />
-            </b-field>
+            <h5 class="title is-5">Game</h5>
+            <p class="subtitle is-6">{{server.meta.type}}</p>
             <hr />
             <b-field label="E-mail">
               <b-input :value="userEmail" custom-class="is-static" readonly />
             </b-field>
           </card-component>
-      </tiles>
-      <password-update-form />
+        </div>
+      </div>
+      <server-tabs />
     </section>
   </div>
 </template>
@@ -43,31 +55,51 @@
 <script>
 import { mapState } from 'vuex'
 import CardComponent from '@/components/CardComponent'
-import PasswordUpdateForm from '@/components/PasswordUpdateForm'
-import Tiles from '@/components/Tiles'
 import HeroBar from '@/components/HeroBar'
 import Console from '@/components/Console'
+import ServerTabs from '@/components/ServerTabs'
 export default {
   name: 'Server',
   components: {
     HeroBar,
-    Tiles,
-    PasswordUpdateForm,
     CardComponent,
-    Console
+    Console,
+    ServerTabs
   },
   data() {
     return {
       serverLines: [
-        "[SM] Changed cvar &quot;sv_maxupdaterate&quot; to &quot;100&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sv_maxupdaterate&quot;) (value &quot;100&quot;)",
-        "[SM] Changed cvar &quot;sv_maxcmdrate&quot; to &quot;100&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sv_maxcmdrate&quot;) (value &quot;100&quot;)",
-        "[SM] Changed cvar &quot;survivor_stun_immunity_duration&quot; to &quot;20&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;survivor_stun_immunity_duration&quot;) (value &quot;20&quot;)",
-        "[SM] Changed cvar &quot;sb_friend_immobilized_reaction_time_hard&quot; to &quot;0.1&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sb_friend_immobilized_reaction_time_hard&quot;) (value &quot;0.1&quot;)",
-        "[SM] Changed cvar &quot;sb_friend_immobilized_reaction_time_expert&quot; to &quot;0.1&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sb_friend_immobilized_reaction_time_expert&quot;) (value &quot;0.1&quot;)",
-        "[SM] Changed cvar &quot;sb_sidestep_for_horde&quot; to &quot;1&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sb_sidestep_for_horde&quot;) (value &quot;1&quot;)",
-        "[SM] Changed cvar &quot;sb_path_lookahead_range&quot; to &quot;350&quot;.L 07/10/2021 - 08:49:37: [basecommands.smx] &quot;Console&lt;0&gt;&lt;Console&gt;&lt;Console&gt;&quot; changed cvar (cvar &quot;sb_path_lookahead_range&quot;) (value &quot;350&quot;)",
-        "Unknown command &quot;sm_spawnweapon_debug&quot;"
-      ]
+        "*!* Beginning custom finale stage 6 of type 2                         [223/1976]",
+        "*!* PendingWaitAdvance false, QueuedDelayAdvances 1",
+        "Jackz ❤: it just keeps rolling",
+        "*!* Update Advancing State finale stage 6 of type 2",
+        "*!* PendingWaitAdvance false, QueuedDelayAdvances 1",
+        "*!* Beginning custom finale stage 7 of type 1",
+        "*!* PendingWaitAdvance true, QueuedDelayAdvances 0",
+        "L 07/10/2021 - 17:32:26: [l4d2_skill_detect.smx] Clear: 6 freed 2 from 7: time: 2.16 / 2.20 -- class: smoker (with shove? 0)",
+        "I Am The Liquor: pft",
+        "*!* Beginning custom finale stage 8 of type 2",
+        "*!* PendingWaitAdvance false, QueuedDelayAdvances 0",
+        "*!* Beginning custom finale stage 9 of type -1",
+        "*!* PendingWaitAdvance false, QueuedDelayAdvances 0",
+        "Jackz ❤ attacked ha_banned",
+        "L 07/10/2021 - 17:33:50: [basechat.smx] \"Jackz ❤<433><STEAM_1:0:49243767><>\" triggered sm_say (text maybe hell try to minigun the restarter)",
+        "*!* EnableEscapeTanks finale stage 9 of type -1",
+        "L 07/10/2021 - 17:34:20: [basechat.smx] \"Jackz ❤<433><STEAM_1:0:49243767><>\" triggered sm_say (text nop )",
+        "ESCAPED: Francis",
+        "ESCAPED: Louis",
+        "ESCAPED: Francis"
+      ],
+      server: {
+        status: true,
+        players: [],
+        name: 'server a',
+        meta: {
+          ip: '127.0.0.1',
+          port: 27015,
+          type: 'Left 4 Dead 2'
+        }
+      }
     }
   },
   computed: {
