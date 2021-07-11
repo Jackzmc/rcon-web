@@ -6,17 +6,15 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     /* User */
-    userName: null,
-    userEmail: null,
-    userAvatar: null,
+    user: {
+      name: null,
+      email: null
+    },
+    servers: [],
 
     /* NavBar */
     isNavBarVisible: true,
-
-    /* FooterBar */
     isFooterBarVisible: true,
-
-    /* Aside */
     isAsideVisible: true,
     isAsideMobileExpanded: false
   },
@@ -29,13 +27,10 @@ export default new Vuex.Store({
     /* User */
     user (state, payload) {
       if (payload.name) {
-        state.userName = payload.name
+        state.user.name = payload.name
       }
       if (payload.email) {
-        state.userEmail = payload.email
-      }
-      if (payload.avatar) {
-        state.userAvatar = payload.avatar
+        state.user.email = payload.email
       }
     },
 

@@ -33,9 +33,14 @@
       </b-table-column>
       <b-table-column custom-key="actions" cell-class="is-actions-cell" v-slot="props">
         <div class="buttons is-right">
-          <router-link :to="{name:'client.edit', params: {id: props.row.id}}" class="button is-small is-primary">
-            <b-icon icon="account-edit" size="is-small"/>
-          </router-link>
+          <b-button tag="router-link" :to="'/server/' + props.row.id" size="is-small" type="is-info" >
+            <span>View</span>
+          </b-button>
+          <b-button tag="router-link" class="button is-small is-warning" type="button"
+            :to="'/server/' + props.row.id + '/edit'"
+          >
+            <b-icon icon="lead-pencil" size="is-small"/>
+          </b-button>
           <button class="button is-small is-danger" type="button" @click.prevent="trashModal(props.row)">
             <b-icon icon="trash-can" size="is-small"/>
           </button>

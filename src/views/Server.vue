@@ -1,7 +1,7 @@
 <template>
   <div>
     <hero-bar>
-      {{server.name}}
+      <span class=" is-uppercase">{{server.name}}</span>
       <p class="subtitle is-6" v-if="server.status">
         <span class="has-text-success">Online</span>
         <span> - {{server.players.length}} players online</span>
@@ -16,8 +16,8 @@
         >
           Edit Server
         </b-button>
-        <b-button tag="router-link" slot="right" type="is-danger" icon-left="delete"
-          :to="'/server/' + $route.params.server + '/delete'"
+        <b-button  slot="right" type="is-danger" icon-left="delete"
+          @click="deleteServer"
         >
           Delete
         </b-button>
@@ -28,22 +28,37 @@
         <div class="column">
           <card-component title="Console" icon="console" contentClass="px-0 py-0">
             <console :lines="serverLines" />
-            <div class="buttons px-3 pb-3 pt-1">
+            <div class="buttons px-3 pb-3 pt-0">
               <b-button icon-left="refresh" type="is-info">Restart</b-button>
             </div>
           </card-component>
         </div>
         <div class="column is-4">
           <card-component title="Server Information" icon="information" >
-            <h5 class="title is-5">{{server.name}}</h5>
-            <p class="subtitle is-6">{{server.meta.ip}}:{{server.meta.port}}</p>
+            <h5 class="title is-5 is-uppercase">{{server.name}}</h5>
+            <p class="subtitle is-6">
+              {{connectIP}}
+              <a class="is-pulled-right" :href="'steam://connect/' + connectIP">Connect</a>
+            </p>
             <hr />
             <h5 class="title is-5">Game</h5>
-            <p class="subtitle is-6">{{server.meta.type}}</p>
+            <p class="subtitle is-6">
+              {{$options.AppTitles[server.meta.appid]}}
+              <span class="is-pulled-right">{{server.version}}</span>
+            </p>
             <hr />
-            <b-field label="E-mail">
-              <b-input :value="userEmail" custom-class="is-static" readonly />
-            </b-field>
+            <div class="tags">
+              <b-tag type="is-dark" v-for="tag in server.meta.tags" :key="tag">{{tag}}</b-tag>
+            </div>
+          </card-component>
+          <card-component title="Players" icon="account-group" >
+            <div class="columns is-multiline">
+              <div class="column is-6 px-0 py-0" v-for="player in server.players" :key="player.steamid">
+                <a class="px-2 py-2 mx-0 my-0 player">
+                  {{player.name}}
+                </a>
+              </div>
+            </div>
           </card-component>
         </div>
       </div>
@@ -58,6 +73,8 @@ import CardComponent from '@/components/CardComponent'
 import HeroBar from '@/components/HeroBar'
 import Console from '@/components/Console'
 import ServerTabs from '@/components/ServerTabs'
+import AppTitles from '@/assets/appid_titles.json'
+
 export default {
   name: 'Server',
   components: {
@@ -66,6 +83,7 @@ export default {
     Console,
     ServerTabs
   },
+  AppTitles,
   data() {
     return {
       serverLines: [
@@ -92,21 +110,54 @@ export default {
       ],
       server: {
         status: true,
-        players: [],
+        players: [
+          { name: "Jackz", steamid: 'STEAM_' },
+          { name: "Givi", steamid: 'STEAM_' },
+          { name: "Heavenira", steamid: 'STEAM_' }
+        ],
         name: 'server a',
         meta: {
           ip: '127.0.0.1',
           port: 27015,
-          type: 'Left 4 Dead 2'
-        }
+          appid: 222860,
+          tags: [
+            "l4d2",
+            "test"
+          ]
+        },
+        version: '2.2.2.0 8267'
       }
     }
   },
   computed: {
+    connectIP() {
+      return this.server.meta.ip + ":" + this.server.meta.port
+    },
     titleStack () {
       return ['Admin', 'Profile']
     },
     ...mapState(['userName', 'userEmail'])
+  },
+  methods: {
+    deleteServer() {
+      this.$buefy.dialog.confirm({
+        message: `Are you sure you want to delete <b>${this.server.name}</b>?<br>This operation cannot be undone.`,
+        confirmText: 'Yes',
+        cancelText: 'No',
+        type: 'is-danger'
+      })
+    }
   }
 }
 </script>
+
+<style>
+a.player {
+  display: inline-block;
+}
+a.player:hover {
+  background-color: rgba(227, 238, 238, 0.36) !important;
+  width: 100%;
+  display: inline-block;
+}
+</style>

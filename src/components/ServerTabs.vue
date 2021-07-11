@@ -3,7 +3,8 @@
   <template slot="header">
     <div class="tabs">
       <ul>
-        <li v-for="tab in $options.TABS"
+        <li
+          v-for="tab in $options.TABS"
           :key="tab"
           :class="{'is-active': activeTab === tab}"
         >
@@ -13,19 +14,24 @@
     </div>
   </template>
   <div v-if="activeTab == 'General'">
-
+    <server-general />
   </div>
   <div v-if="activeTab == 'Logs'">
-    logs.
+    <server-logs />
   </div>
   <div v-if="activeTab == 'Files'">
-    files
+    <server-files />
   </div>
 </card-component>
 </template>
 
 <script>
 import CardComponent from '@/components/CardComponent'
+
+import ServerFiles from '@/components/server/ServerFiles'
+import ServerLogs from '@/components/server/ServerLogs'
+import ServerGeneral from '@/components/server/ServerGeneral'
+
 export default {
   name: 'ServerTabs',
   TABS: [
@@ -34,7 +40,10 @@ export default {
     "Files"
   ],
   components: {
-    CardComponent
+    CardComponent,
+    ServerGeneral,
+    ServerLogs,
+    ServerFiles
   },
   data () {
     return {

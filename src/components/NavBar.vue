@@ -29,7 +29,7 @@
         <nav-bar-menu class="has-divider has-user-avatar">
           <user-avatar />
           <div class="is-user-name">
-            <span>{{ userName }}</span>
+            <span>{{ user.name }}</span>
           </div>
 
           <div slot="dropdown" class="navbar-dropdown">
@@ -50,7 +50,7 @@
               <span>Messages</span>
             </a>
             <hr class="navbar-divider" />
-            <a class="navbar-item">
+            <a class="navbar-item has-text-danger">
               <b-icon icon="logout" custom-size="default"></b-icon>
               <span>Log Out</span>
             </a>
@@ -84,7 +84,7 @@ export default {
     menuToggleMobileIcon () {
       return this.isAsideMobileExpanded ? 'backburger' : 'forwardburger'
     },
-    ...mapState(['isNavBarVisible', 'isAsideMobileExpanded', 'userName'])
+    ...mapState(['isNavBarVisible', 'isAsideMobileExpanded', 'user'])
   },
   mounted () {
     this.$router.afterEach(() => {

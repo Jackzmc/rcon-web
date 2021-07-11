@@ -74,6 +74,10 @@ const routes = [
     name: 'client.edit',
     component: () => import(/* webpackChunkName: "client-form" */ '../views/ClientForm.vue'),
     props: true
+  },
+  {
+    path: '*',
+    component: () => import(/* webpackChunkName: "missing" */ '../views/404.vue')
   }
 ]
 
