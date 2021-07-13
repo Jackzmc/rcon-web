@@ -9,6 +9,8 @@
         "inlineSourceMap": true,
         "outDir": "dist",
         "allowJs": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
         "paths": {
             "*": [
                 "node_modules/*",

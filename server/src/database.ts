@@ -1,7 +1,11 @@
-import mysql from 'mysql2/promise'
+import "reflect-metadata";
+import { createConnection, Connection, Repository } from "typeorm";
+
+import { Server } from './entity/Server'
 
 export default class Database {
-  private connection: mysql.Connection = null
+  #connection: Connection = null
+  #Servers: Repository<Server>
 
   constructor() {
 
@@ -9,36 +13,36 @@ export default class Database {
 
   async init() {
     try {
-      const connection = await mysql.createConnection({
+      const connection = await createConnection({
+        type: "mysql",
         host: process.env.MYSQL_HOST || 'localhost',
-        user: process.env.MYSQL_USERNAME || 'root',
+        username: process.env.MYSQL_USERNAME || 'root',
         database: process.env.MYSQL_DB || 'rcon-web',
-        password: process.env.MYSQL_PASSWORD || ''
+        password: process.env.MYSQL_PASSWORD || '',
+        entities: [
+          Server
+        ],
+        synchronize: true,
       })
-      this.connection = connection
+      this.#connection = connection
       console.info(`[DB] Connected to ${process.env.MYSQL_DB || 'rcon-web'} successfully`)
-      return true
+      return connection
     } catch(err) {
       console.error('[DB] Could not connect to database, terminating', err)
       process.exit(1)
-      return false
     }
   }
 
   get ready() {
-    return !!this.connection
+    return !!this.#connection
   }
 
-  servers() {
-    const _this = this
-    return {
-      async fetchAll() {
-        const [data] = await _this.connection.execute("SELECT * FROM servers")
-        return data
-      }
-    }
+  get connection() {
+    return this.#connection
+  }
+
+  get Servers() {
+    if(this.#Servers) return this.#Servers
+    return this.connection.getRepository(Server)
   }
 }
-
-
-//db.servers().
