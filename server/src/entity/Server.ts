@@ -1,13 +1,16 @@
-import { Entity, Column, PrimaryColumn, BeforeInsert } from "typeorm";
+import { Entity, Column, PrimaryColumn, BeforeInsert, UpdateDateColumn, CreateDateColumn, VersionColumn, Unique, ManyToMany, JoinTable } from "typeorm";
 import crypto from 'crypto'
+import { User } from './User';
 
-@Entity()
+@Entity({ name: 'servers' })
+@Unique(["ip", "port"])
 export class Server {
   @PrimaryColumn('varchar', { length: 16 })
   id: String
   @BeforeInsert()
-  private async createID() {
-    this.id = await Server.generateID()
+  private async createIDIfNotExists() {
+    if(!this.id)
+      this.id = await Server.generateID()
   }
 
   @Column({
@@ -21,14 +24,24 @@ export class Server {
   @Column("smallint")
   port: Number
 
-  @Column()
-  tags: String
+  @Column('simple-array')
+  tags: String[]
 
-  @Column()
+  @CreateDateColumn()
   created: Date
+
+  @UpdateDateColumn()
+  updatedDate: Date;
+
+  @VersionColumn()
+  version: number;
 
   @Column()
   directory: String
+
+  @ManyToMany(() => User, user => user.servers)
+  @JoinTable({ name: 'permissions' })
+  users: User[];
 
   static generateID(): Promise<string> {
     return new Promise((res) => {
@@ -39,5 +52,11 @@ export class Server {
           res(enc);
       });
     })
+  }
+
+  constructor(id?: String) {
+    if(id) {
+      this.id = id
+    }
   }
 }
