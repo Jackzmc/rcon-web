@@ -139,9 +139,9 @@ export default {
   methods: {
     refreshServers() {
       this.servers.loading = true
-      fetch(`${this.$router.options.base}data-sources/servers.json`)
+      fetch(`http://localhost:8081/api/servers`)
         .then(res => res.json())
-        .then(json => this.servers.list = json.data)
+        .then(json => this.servers.list = json)
         .finally(() => this.servers.loading = false)
     },
     randomChartData (n) {
