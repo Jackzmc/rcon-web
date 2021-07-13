@@ -8,11 +8,13 @@ const app = express()
 
 const db = new Database()
 
+import { generateError } from './util'
 import Servers from './routes/servers'
 
 db.init()
 .then(() => {
-  app.use('/api/servers', Servers(db))
+  app.locals.error = generateError
+  app.use('/api/servers', Servers(app, db))
 
 
   app.listen(WEB_PORT, () => {
