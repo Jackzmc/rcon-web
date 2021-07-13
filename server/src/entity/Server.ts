@@ -1,10 +1,14 @@
-import { Entity, Column, PrimaryColumn } from "typeorm";
+import { Entity, Column, PrimaryColumn, BeforeInsert } from "typeorm";
 import crypto from 'crypto'
 
 @Entity()
 export class Server {
-  @PrimaryColumn({ length: 16 })
+  @PrimaryColumn('varchar', { length: 16 })
   id: String
+  @BeforeInsert()
+  private async createID() {
+    this.id = await Server.generateID()
+  }
 
   @Column({
     length: 64
@@ -26,7 +30,7 @@ export class Server {
   @Column()
   directory: String
 
-  static generateID() {
+  static generateID(): Promise<string> {
     return new Promise((res) => {
       crypto.randomBytes(12, (err, buf) => {
           if(err) throw err;
@@ -34,6 +38,6 @@ export class Server {
           if(enc.length !== 16) throw 'invalid';
           res(enc);
       });
-    });
+    })
   }
 }

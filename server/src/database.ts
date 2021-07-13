@@ -26,7 +26,7 @@ export default class Database {
       })
       this.#connection = connection
       console.info(`[DB] Connected to ${process.env.MYSQL_DB || 'rcon-web'} successfully`)
-      return connection
+      return this
     } catch(err) {
       console.error('[DB] Could not connect to database, terminating', err)
       process.exit(1)
