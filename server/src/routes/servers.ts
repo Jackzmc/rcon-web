@@ -46,12 +46,13 @@ export default function(app: Express, db: Database) {
     }
 
     //If no server exists, create a new one
-    const server = new Server()
-    server.id = await Server.generateID()
-    server.directory = req.body.directory
-    server.name = req.body.name
-    server.port = req.body.port
-    server.ip = req.body.ip
+    const server = db.Servers.create({
+      id: await Server.generateID(),
+      directory: req.body.directory,
+      name: req.body.name,
+      port: req.body.port,
+      ip: req.body.ip
+    })
 
     await db.Servers.save(server)
 
