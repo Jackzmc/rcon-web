@@ -9,17 +9,41 @@ const router = Router()
 export default function(app: Express, db: Database) {
   router.get('/', requireAuth, async(req, res) => {
     const user = await db.Users.findOneOrFail(req.session.user.id, { relations: ['servers', 'permissions']})
-    res.json({
-      owned: user.servers
-        .map(server => {
-          return { ...server, owned: true }
-        }),
-      shared: user.permissions
-        .map(permissions => permissions.server)
-        .map(server => {
-          return { ...server, owned: false }
-        }),
-    })
+    if (req.query.full) {
+      const owned = [], shared = []
+      for(const server of user.servers) {
+        owned.push({
+          ...server,
+          owned: true,
+          details: await server.details()
+        })
+      }
+
+      for(const server of user.permissions.map(permissions => permissions.server)) {
+        shared.push({
+          ...server,
+          owned: false,
+          details: await server.details()
+        })
+      }
+
+      res.json({
+        owned,
+        shared
+      })
+    } else {
+      res.json({
+        owned: user.servers
+          .map(server => {
+            return { ...server, owned: true }
+          }),
+        shared: user.permissions
+          .map(permissions => permissions.server)
+          .map(server => {
+            return { ...server, owned: false }
+          }),
+      })
+    }
   })
 
   //TODO: Query shit

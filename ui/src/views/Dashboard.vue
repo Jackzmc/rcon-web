@@ -138,7 +138,8 @@ export default {
     this.fillChartData()
     this.$store.dispatch('refreshServers')
   },
-
+  mounted() {
+  },
   methods: {
     refreshServers() {
       this.$store.dispatch('refreshServers')

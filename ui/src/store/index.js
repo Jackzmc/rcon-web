@@ -91,7 +91,7 @@ export default new Vuex.Store({
       commit('servers', {
         loading: true
       })
-      fetch(`/api/servers`, {
+      fetch(`/api/servers?full=1`, {
         credentials: 'include'
       })
         .then(res => {

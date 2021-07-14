@@ -19,14 +19,17 @@
       :show-header="servers.length > 0"
     >
       <b-table-column label="Name" field="name" sortable v-slot="props">
+        <b-icon v-if="props.row.owned" icon="crown"  size="is-small" />
         {{ props.row.name }}
       </b-table-column>
       <b-table-column label="Status" sortable :custom-sort="sortStatus" v-slot="props">
-        <span class="has-text-success" v-if="props.row.status">Online</span>
+        <span class="has-text-success" v-if="props.row.details.online">Online</span>
         <span class="has-text-danger" v-else>Offline</span>
       </b-table-column>
-      <b-table-column label="Players" sortable :custom-sort="sortPlayers">
-        0 / 0
+      <b-table-column label="Players" sortable :custom-sort="sortPlayers" v-slot="props">
+        <template v-if="props.row.details.online">
+          {{ props.row.details.players.length }} / {{ props.row.details.maxplayers }}
+        </template>
       </b-table-column>
       <b-table-column label="Created" v-slot="props">
         <small class="has-text-grey is-abbr-like" :title="props.row.created">{{ props.row.created }}</small>
@@ -122,9 +125,9 @@ export default {
     },
     sortPlayers(a, b, ascending) {
       if (ascending) {
-        return b.players.length - a.players.length
+        return b.details.players.length - a.details.players.length
       } else {
-        return a.players.length - b.players.length
+        return a.details.players.length - b.details.players.length
       }
     },
     trashModal (trashObject) {
