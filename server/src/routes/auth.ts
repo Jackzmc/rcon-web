@@ -7,6 +7,10 @@ import User from '../entity/User';
 const router = Router()
 
 export default function(app: Express, db: Database) {
+  router.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store')
+    next()
+  })
   router.post('/login', checkParameters([
     "username",
     "password"
@@ -26,6 +30,7 @@ export default function(app: Express, db: Database) {
     }
 
     if(await user.login(req.body.password)) {
+      delete user.password
       req.session.user = {
         id: user.id,
         email: user.email,
@@ -33,10 +38,21 @@ export default function(app: Express, db: Database) {
         lastLogin: user.lastLogin,
         sessionCreated: new Date()
       }
-      res.send()
+      res.json({
+        user: req.session.user,
+        sessionId: req.sessionID
+      })
     } else {
       return res.status(400).json(app.locals.error(ErrorCode.UNAUTHORIZED, "Invalid username or password"))
     }
+  })
+
+  //Check if session is valid
+  router.get('/session', requireAuth, async(req, res) => {
+    res.json({
+      user: req.session.user,
+      sessionId: req.sessionID
+    })
   })
 
   return router

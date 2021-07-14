@@ -7,34 +7,43 @@ import Server from '../entity/Server';
 const router = Router()
 
 export default function(app: Express, db: Database) {
-  router.get('/:id', requireAuth, async(req, res) => {
-    const server = await db.Servers.findOne(req.params.id)
-    if(server) {
-      return res.json({
-        ...server,
-        status: await server.details()
-      })
-    }
-    else res.status(404).json(app.locals.error(ErrorCode.SERVER_NOT_FOUND))
-  })
-
   router.get('/', requireAuth, async(req, res) => {
     const user = await db.Users.findOneOrFail(req.session.user.id, { relations: ['servers', 'permissions']})
     res.json({
-      owned: user.servers,
-      shared: user.permissions.map(permissions => permissions.server)
+      owned: user.servers
+        .map(server => {
+          return { ...server, owned: true }
+        }),
+      shared: user.permissions
+        .map(permissions => permissions.server)
+        .map(server => {
+          return { ...server, owned: false }
+        }),
     })
   })
 
   //TODO: Query shit
   router.get('/details', requireAuth, async(req, res) => {
-    // res.json(result.map(server => {
-    //   return {
-    //     ...server,
-    //     players: [],
-    //     status: true
-    //   }
-    // }))
+    if(!req.query.servers) return res.status(400).json({
+      ...app.locals.error(ErrorCode.MISSING_PARAMS),
+      query: {
+        "servers": "Comma list of servers to check"
+      }
+    })
+    const user = await db.Users.findOneOrFail(req.session.user.id, { relations: ['servers', 'permissions']})
+
+    const ids: string[] = (req.query.servers as string).split(",")
+    const servers = []
+    for(const id in ids) {
+      const server = await db.Servers.findOne(id)
+      if(server.hasPermission(user)) {
+        servers.push({
+          ...server,
+          details: await server.details()
+        })
+      }
+    }
+    res.json(servers)
   })
 
   router.post('/', requireAuth, checkParameters([
@@ -72,6 +81,17 @@ export default function(app: Express, db: Database) {
       result: 'SUCCESS',
       id: server.id
     })
+  })
+
+  router.get('/:id', requireAuth, async(req, res) => {
+    const server = await db.Servers.findOne(req.params.id)
+    if(server) {
+      return res.json({
+        ...server,
+        status: await server.details()
+      })
+    }
+    else res.status(404).json(app.locals.error(ErrorCode.SERVER_NOT_FOUND))
   })
 
   return router

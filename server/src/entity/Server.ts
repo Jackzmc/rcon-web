@@ -124,4 +124,9 @@ export default class Server {
     }
   }
 
+  async hasPermission(user: User): Promise<boolean> {
+    //TODO: Implement
+    return true
+  }
+
 }

@@ -14,7 +14,8 @@ const messages = {
 export function generateError(code: ErrorCode, message?: String) {
   return {
     code,
-    message: message || messages[code]
+    message: message || messages[code],
+    error: true
   }
 }
 

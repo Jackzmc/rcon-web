@@ -50,4 +50,9 @@ export default class User {
     return match
   }
 
+  async hasPermission(server: Server): Promise<boolean> {
+    return true
+    //TODO: Implement
+  }
+
 }

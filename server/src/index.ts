@@ -31,19 +31,21 @@ new Database().init()
     saveUninitialized: false,
     resave: false,
     cookie: { path: '/', httpOnly: true, secure: process.env.NODE_ENV === "production", maxAge: null, sameSite: true },
+    name: 'rconweb',
     store: new TypeormStore({ repository: db.Sessions })
     //TODO: implement mysql store store: process.env.NODE_ENV === "production" ?
   }))
   //Setup cors for a list of domains
-  const domains = process.env.CORS_DOMAINS ? process.env.CORS_DOMAINS.split(",") : []
+  const domains = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",") : []
   app.use(Cors({
     origin: (origin: string, callback: Function) => {
       if(domains.indexOf(origin) !== -1 || !origin) {
         callback(null, true)
       } else {
-        callback(new Error('Not allowed by CORS'))
+        callback(null, false)
       }
-    }
+    },
+    methods: "GET, PUT, POST, DELETE"
   }))
   app.use('/api/auth', Auth(app, db))
   app.use('/api/servers', Servers(app, db))
