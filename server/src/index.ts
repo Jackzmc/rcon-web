@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import Database from './database'
+import "reflect-metadata"
 dotenv.config()
 
 const WEB_PORT = process.env.WEB_PORT || 8080

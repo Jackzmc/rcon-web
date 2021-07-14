@@ -1,10 +1,12 @@
-import { Entity, Column, PrimaryColumn, BeforeInsert, UpdateDateColumn, CreateDateColumn, VersionColumn, Unique, ManyToMany, JoinTable } from "typeorm";
+import { Entity, Column, PrimaryColumn, BeforeInsert, UpdateDateColumn, CreateDateColumn, VersionColumn, Unique, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
 import crypto from 'crypto'
-import { User } from './User';
+import User from './User';
+import Permissions from './Permissions'
+
 
 @Entity({ name: 'servers' })
-@Unique(["ip", "port"])
-export class Server {
+@Unique('connect_address', ["ip", "port"])
+export default class Server {
   @PrimaryColumn('varchar', { length: 16 })
   id: String
   @BeforeInsert()
@@ -39,9 +41,8 @@ export class Server {
   @Column()
   directory: String
 
-  @ManyToMany(() => User, user => user.servers)
-  @JoinTable({ name: 'permissions' })
-  users: User[];
+  @OneToMany(() => Permissions, permissions => permissions.server)
+  users!: Permissions[];
 
   static generateID(): Promise<string> {
     return new Promise((res) => {

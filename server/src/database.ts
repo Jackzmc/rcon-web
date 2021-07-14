@@ -1,8 +1,9 @@
 import "reflect-metadata";
 import { createConnection, Connection, Repository } from "typeorm";
 
-import { Server } from './entity/Server'
-import { User } from './entity/User';
+import Server from './entity/Server'
+import User from './entity/User';
+import Permissions from './entity/Permissions'
 
 export default class Database {
   #connection: Connection = null
@@ -23,9 +24,11 @@ export default class Database {
         password: process.env.MYSQL_PASSWORD || '',
         entities: [
           Server,
-          User
+          User,
+          Permissions
         ],
         synchronize: true,
+
       })
       this.#connection = connection
       console.info(`[DB] Connected to ${process.env.MYSQL_DB || 'rcon-web'} successfully`)
@@ -79,14 +82,15 @@ export default class Database {
       const user1 = this.Users.create({
         username: 'admin',
         password: "$2y$12$1TEbqhZ4clzutfszr4gpAeI6kLs.73l1Fsz6.UCSBNTMmdIL9So9q", //example-data
-        email: 'test@example.com',
-        servers: [
-          server1
-        ]
+        email: 'test@example.com'
       })
 
-      this.Servers.save(server1)
-      this.Users.save(user1)
+      await this.Servers.save(server1)
+      await this.Users.save(user1)
+
+      const user1_perms_server1 = new Permissions(user1.id, server1.id, 1)
+      this.connection.manager.save(user1_perms_server1)
+
       console.info('[DB] Generated starter data')
     } catch(err) {
 

@@ -1,28 +1,30 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, Unique } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, Unique, OneToMany, ManyToOne } from "typeorm";
 import bcrypt from 'bcrypt'
-import { Server } from './Server';
+import Server from './Server';
+import Permissions from './Permissions'
+
 
 const ENCRYPTION_ROUNDS = process.env.BCRYPT_SALT_ROUNDS || 12
 
 @Entity({ name: 'users' })
-@Unique(["email"])
-@Unique(["username"])
-export class User {
+export default class User {
   @PrimaryGeneratedColumn()
   id: Number
 
   @Column('varchar', {
-    length: 64
+    length: 64,
+    unique: true
   })
   username: String
 
   @Column('varchar', {
-    length: 255
+    length: 191,
+    unique: true
   })
   email: String
 
-  @Column({
-    length: 128,
+  @Column('binary', {
+    length: 60,
     select: false
   })
   password: String
@@ -33,8 +35,8 @@ export class User {
   @Column()
   lastLogin: Date;
 
-  @ManyToMany(() => Server, server => server.users)
-  servers: Server[]
+  @OneToMany(() => Permissions, permissions => permissions.user, { cascade: true })
+  permissions!: Permissions[]
 
   login(password: String): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {

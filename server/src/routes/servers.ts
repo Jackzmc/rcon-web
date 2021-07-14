@@ -2,7 +2,7 @@ import Database  from '../database.js'
 import { Router } from 'express'
 import { ErrorCode, checkParameters } from '../util';
 import { Express } from 'express'
-import { Server } from '../entity/Server';
+import Server from '../entity/Server';
 
 const router = Router()
 
