@@ -130,18 +130,26 @@ export default {
   mounted () {
     this.fillChartData()
     this.refreshServers()
-
-    this.$buefy.snackbar.open({
-      message: 'Welcome back',
-      queue: false
-    })
   },
   methods: {
     refreshServers() {
       this.servers.loading = true
-      fetch(`http://localhost:8081/api/servers`)
-        .then(res => res.json())
+      fetch(`http://localhost:8081/api/servers`, { })
+        .then(res => {
+          if (res.ok) return res.json()
+          this.$buefy.snackbar.open({
+            type: 'is-danger',
+            message: `Failed to acquire servers: ${res.statusText}`
+          })
+          this.servers.loading = false
+        })
         .then(json => this.servers.list = json)
+        .catch(() => {
+          this.$buefy.snackbar.open({
+            type: 'is-danger',
+            message: `A network error occurred while fetching servers`
+          })
+        })
         .finally(() => this.servers.loading = false)
     },
     randomChartData (n) {

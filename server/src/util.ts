@@ -1,11 +1,14 @@
+import Database from './database';
 export enum ErrorCode {
   SERVER_NOT_FOUND = "SERVER_NOT_FOUND",
   MISSING_PARAMS = "MISSING_PARAMS",
   SERVER_ALREADY_EXISTS = "SERVER_ALREADY_EXISTS",
+  UNAUTHORIZED = "UNAUTHORIZED"
 }
 const messages = {
   SERVER_NOT_FOUND: "Server was not found",
-  MISSING_PARAMS: "Parameters are missing from your request"
+  MISSING_PARAMS: "Parameters are missing from your request",
+  UNAUTHORIZED: "No active account session"
 }
 
 export function generateError(code: ErrorCode, message?: String) {
@@ -15,11 +18,25 @@ export function generateError(code: ErrorCode, message?: String) {
   }
 }
 
-export function checkParameters(parameters: string[]) {
+//Checks if parameters exist on req.body, pass in array of names. Pass a 2d array for OR
+//[ ['a', 'b'] ] will need either a OR b
+// ['a', 'b' ] will require both a AND b
+export function checkParameters(parameters: (string | string[])[]) {
   return function(req, res, next) {
     const missing = []
     for(const param of parameters) {
-      if(!req.body[param]) {
+      if(Array.isArray(param)) {
+        let hasOne = false
+        for(const orParam of param) {
+          if(req.body[orParam]) {
+            hasOne = true
+            break
+          }
+        }
+        if(!hasOne) {
+          missing.push(param)
+        }
+      }else if(!req.body[param]) {
         missing.push(param)
       }
     }
@@ -33,4 +50,9 @@ export function checkParameters(parameters: string[]) {
       next()
     }
   }
+}
+
+export function requireAuth(req, res, next) {
+  if(!req.session || !req.session.user) return res.status(401).json(generateError(ErrorCode.UNAUTHORIZED))
+  next()
 }

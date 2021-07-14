@@ -1,14 +1,17 @@
 import "reflect-metadata";
 import { createConnection, Connection, Repository } from "typeorm";
 
-import Server from './entity/Server'
+import Server, { ServerType } from './entity/Server'
 import User from './entity/User';
 import Permissions from './entity/Permissions'
+import bcrypt from 'bcrypt';
+import { Session } from './entity/Session';
 
 export default class Database {
   #connection: Connection = null
   #Servers: Repository<Server>
   #Users: Repository<User>
+  #Sessions: Repository<Session>
 
   constructor() {
 
@@ -25,7 +28,8 @@ export default class Database {
         entities: [
           Server,
           User,
-          Permissions
+          Permissions,
+          Session
         ],
         synchronize: true,
 
@@ -62,6 +66,11 @@ export default class Database {
     return this.connection.getRepository(User)
   }
 
+  get Sessions() {
+    if(this.#Sessions) return this.#Sessions
+    return this.connection.getRepository(Session)
+  }
+
   //Generates starter data
   private async createStarterData() {
     if(await this.Servers.count() > 0) return
@@ -69,6 +78,7 @@ export default class Database {
       const server1 = this.Servers.create({
         id: 'example-server-1',
         name: 'Example Data Server 1',
+        type: ServerType.VALVE,
         ip: 'localhost',
         port: 27029,
         tags: [
@@ -79,16 +89,19 @@ export default class Database {
         directory: '/tmp/test'
       })
 
+      const hash = await bcrypt.hash('example-data', 12)
       const user1 = this.Users.create({
         username: 'admin',
-        password: "$2y$12$1TEbqhZ4clzutfszr4gpAeI6kLs.73l1Fsz6.UCSBNTMmdIL9So9q", //example-data
+        password: hash, //example-data
         email: 'test@example.com'
       })
+
+      server1.owner = Promise.resolve(user1)
 
       await this.Servers.save(server1)
       await this.Users.save(user1)
 
-      const user1_perms_server1 = new Permissions(user1.id, server1.id, 1)
+      const user1_perms_server1 = new Permissions(user1, server1, 1)
       this.connection.manager.save(user1_perms_server1)
 
       console.info('[DB] Generated starter data')

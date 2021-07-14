@@ -8,24 +8,21 @@ export enum PermissionFlags {
 
 @Entity({ name: 'permissions' })
 export default class Permissions {
-  @PrimaryColumn()
-  private userId: Number
 
-  @PrimaryColumn('varchar', { length: 16 })
-  private serverId: String
+  @ManyToOne(() => User, user => user.permissions, { primary: true })
+  @JoinColumn({ name: 'userId' })
+  user: Promise<User>;
 
-  @ManyToOne(() => User, user => user.permissions) // inverse "userPlaces: UserPlace[]" is one-to-many in user
-  user: User;
-
-  @ManyToOne(() => Server, server => server.users) // inverse "userPlaces: UserPlace[]" is one-to-many in user
+  @ManyToOne(() => Server, server => server.users, { primary: true, eager: true })
+  @JoinColumn({ name: 'serverId'})
   server: Server;
 
   @Column()
-  level: number
+  flags: number
 
-  constructor(userId: Number, serverId: String, level?: number) {
-    this.userId = userId
-    this.serverId = serverId
-    this.level = level || 0
+  constructor(user: User, server: Server, flags?: number) {
+    this.user = Promise.resolve(user)
+    this.server = server
+    this.flags = flags || 0
   }
 }

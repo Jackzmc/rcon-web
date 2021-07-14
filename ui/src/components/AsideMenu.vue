@@ -28,7 +28,7 @@ export default {
   components: { AsideTools, AsideMenuList },
   props: {
     menu: {
-      type: Array,
+      type: Object,
       default: () => []
     }
   },

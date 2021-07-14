@@ -1,7 +1,34 @@
-import { Entity, Column, PrimaryColumn, BeforeInsert, UpdateDateColumn, CreateDateColumn, VersionColumn, Unique, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
-import crypto from 'crypto'
+import { Entity, Column, PrimaryColumn, BeforeInsert, UpdateDateColumn, CreateDateColumn, VersionColumn, Unique, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import User from './User';
 import Permissions from './Permissions'
+
+import crypto from 'crypto'
+import Gamedig from 'gamedig'
+
+export const enum ServerType {
+  VALVE,
+  MINECRAFT,
+  RUST,
+  OTHER
+}
+
+const Protocols = {
+  [ServerType.VALVE]: "protocol-valve"
+}
+
+interface Player {
+  id: String,
+  name: String
+}
+
+interface ServerDetails {
+  online: boolean,
+  players: Player[] | null,
+  maxplayers?: number
+  version?: String,
+  gamedata?: any,
+  appid?: number
+}
 
 
 @Entity({ name: 'servers' })
@@ -19,6 +46,13 @@ export default class Server {
     length: 64
   })
   name: String
+
+  @Column('int')
+  type: ServerType
+
+  @ManyToOne(() => User, user => user.servers)
+  @JoinColumn({ name: 'ownerId' })
+  owner!: Promise<User>
 
   @Column({ length: 32 })
   ip: String
@@ -44,6 +78,8 @@ export default class Server {
   @OneToMany(() => Permissions, permissions => permissions.server)
   users!: Permissions[];
 
+  private status;
+
   static generateID(): Promise<string> {
     return new Promise((res) => {
       crypto.randomBytes(12, (err, buf) => {
@@ -60,4 +96,32 @@ export default class Server {
       this.id = id
     }
   }
+
+  async details(): Promise<ServerDetails> {
+    try {
+      const state = await Gamedig.query({
+        type: Protocols[this.type],
+        host: 'lgs.jackz.me', //this.ip,
+        port: 27015 //this.port
+      })
+      return {
+        online: true,
+        players: state.players,
+        maxplayers: state.maxplayers,
+        version: state.raw.version,
+        gamedata: {
+          name: state.name,
+          map: state.map
+        },
+        appid: state.appId
+      };
+    } catch(err) {
+      return {
+        online: false,
+        players: null,
+        version: null
+      }
+    }
+  }
+
 }

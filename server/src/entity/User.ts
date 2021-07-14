@@ -9,7 +9,7 @@ const ENCRYPTION_ROUNDS = process.env.BCRYPT_SALT_ROUNDS || 12
 @Entity({ name: 'users' })
 export default class User {
   @PrimaryGeneratedColumn()
-  id: Number
+  id: number
 
   @Column('varchar', {
     length: 64,
@@ -23,7 +23,7 @@ export default class User {
   })
   email: String
 
-  @Column('binary', {
+  @Column('char', {
     length: 60,
     select: false
   })
@@ -38,13 +38,16 @@ export default class User {
   @OneToMany(() => Permissions, permissions => permissions.user, { cascade: true })
   permissions!: Permissions[]
 
-  login(password: String): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      bcrypt.compare(password, this.password, (err: Error, result: boolean) => {
-        if(err) return reject(err)
-        resolve(result)
-      })
-    })
+  @OneToMany(() => Server, server => server.owner, { cascade: ['remove'] })
+  servers: Server[]
+
+  async login(password: String): Promise<boolean> {
+    const match = await bcrypt.compare(password, this.password);
+
+    if(match) {
+      this.lastLogin = new Date()
+    }
+    return match
   }
 
 }
