@@ -43,6 +43,7 @@ export default new Vuex.Store({
 
     servers (state, payload) {
       if (payload.loading !== undefined) state.servers.loading = payload.loading
+      if (payload.loading) state.servers.list = []
       if (payload.servers) {
         for (const server of payload.servers) {
           state.servers.list.push(server)
@@ -90,6 +91,7 @@ export default new Vuex.Store({
     refreshServers({ commit }) {
       commit('servers', {
         loading: true
+
       })
       fetch(`/api/servers?full=1`, {
         credentials: 'include'

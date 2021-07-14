@@ -19,11 +19,12 @@ export default function(app: Express, db: Database) {
         })
       }
 
-      for(const server of user.permissions.map(permissions => permissions.server)) {
+      for(const permission of user.permissions) {
         shared.push({
-          ...server,
+          ...permission.server,
           owned: false,
-          details: await server.details()
+          permissions: permission.flags,
+          details: await permission.server.details()
         })
       }
 

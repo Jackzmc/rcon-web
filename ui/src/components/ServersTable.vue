@@ -39,12 +39,13 @@
           <b-button tag="router-link" :to="'/server/' + props.row.id" size="is-small" type="is-info" >
             <span>View</span>
           </b-button>
+          <!-- TODO: Check flags v-if -->
           <b-button tag="router-link" class="button is-small is-warning" type="button"
             :to="'/server/' + props.row.id + '/edit'"
           >
             <b-icon icon="lead-pencil" size="is-small"/>
           </b-button>
-          <button class="button is-small is-danger" type="button" @click.prevent="trashModal(props.row)">
+          <button v-if="props.row.owned" class="button is-small is-danger" type="button" @click.prevent="trashModal(props.row)">
             <b-icon icon="trash-can" size="is-small"/>
           </button>
         </div>
