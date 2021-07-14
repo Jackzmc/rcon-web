@@ -94,6 +94,7 @@ import Tiles from '@/components/Tiles'
 import CardWidget from '@/components/CardWidget'
 import CardComponent from '@/components/CardComponent'
 import ServersTable from '@/components/ServersTable'
+
 export default {
   name: 'Home',
   components: {
@@ -110,10 +111,7 @@ export default {
         chartData: null,
         extraOptions: chartConfig.chartOptionsMain
       },
-      servers: {
-        list: [],
-        loading: false
-      }
+      servers_loading: false
     }
   },
   computed: {
@@ -121,36 +119,29 @@ export default {
       return ['Dashboard']
     },
     serversOnline() {
-      return this.servers.list.filter(a => a.status).length
+      return this.servers.list.filter(a => a.details?.online).length
     },
     onlinePlayers() {
-      return this.servers.list.reduce((a, c) => a + c.players.length, 0)
+      return this.servers.list.reduce((a, c) => {
+        if (c.details)
+          return a + c.details.players.length
+      }, 0)
+    },
+    servers: function() {
+      return {
+        list: this.$store.state.servers.list,
+        loading: this.$store.state.servers.loading
+      }
     }
   },
-  mounted () {
+  created () {
     this.fillChartData()
-    this.refreshServers()
+    this.$store.dispatch('refreshServers')
   },
+
   methods: {
     refreshServers() {
-      this.servers.loading = true
-      fetch(`http://localhost:8081/api/servers`, { })
-        .then(res => {
-          if (res.ok) return res.json()
-          this.$buefy.snackbar.open({
-            type: 'is-danger',
-            message: `Failed to acquire servers: ${res.statusText}`
-          })
-          this.servers.loading = false
-        })
-        .then(json => this.servers.list = json)
-        .catch(() => {
-          this.$buefy.snackbar.open({
-            type: 'is-danger',
-            message: `A network error occurred while fetching servers`
-          })
-        })
-        .finally(() => this.servers.loading = false)
+      this.$store.dispatch('refreshServers')
     },
     randomChartData (n) {
       const data = []

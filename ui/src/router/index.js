@@ -41,39 +41,11 @@ const routes = [
   },
   {
     meta: {
-      title: 'Tables'
+      title: 'Login'
     },
-    path: '/tables',
-    name: 'tables',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "tables" */ '../views/Tables.vue')
-  },
-  {
-    meta: {
-      title: 'Profile'
-    },
-    path: '/profile',
-    name: 'profile',
-    component: () => import(/* webpackChunkName: "profile" */ '../views/Server.vue')
-  },
-  {
-    meta: {
-      title: 'New Client'
-    },
-    path: '/client/new',
-    name: 'client.new',
-    component: () => import(/* webpackChunkName: "client-form" */ '../views/ClientForm.vue')
-  },
-  {
-    meta: {
-      title: 'Edit Client'
-    },
-    path: '/client/:id',
-    name: 'client.edit',
-    component: () => import(/* webpackChunkName: "client-form" */ '../views/ClientForm.vue'),
-    props: true
+    path: '/login',
+    name: 'login',
+    component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue')
   },
   {
     path: '*',

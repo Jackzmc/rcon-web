@@ -1,5 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import router from '../router'
+
+import { SnackbarProgrammatic as Snackbar } from 'buefy'
 
 Vue.use(Vuex)
 
@@ -8,14 +11,18 @@ export default new Vuex.Store({
     /* User */
     user: {
       name: null,
-      email: null
+      email: null,
+      sessionid: null
     },
-    servers: [],
+    servers: {
+      list: [],
+      loading: false
+    },
 
     /* NavBar */
-    isNavBarVisible: true,
-    isFooterBarVisible: true,
-    isAsideVisible: true,
+    isNavBarVisible: false,
+    // isFooterBarVisible: true,
+    isAsideVisible: false,
     isAsideMobileExpanded: false
   },
   mutations: {
@@ -26,11 +33,20 @@ export default new Vuex.Store({
 
     /* User */
     user (state, payload) {
-      if (payload.name) {
-        state.user.name = payload.name
-      }
-      if (payload.email) {
-        state.user.email = payload.email
+      state.user.name = payload.username
+      state.user.email = payload.email
+      state.user.sessionid = payload.sessionId
+
+      state.isNavBarVisible = true
+      state.isAsideVisible = true
+    },
+
+    servers (state, payload) {
+      if (payload.loading !== undefined) state.servers.loading = payload.loading
+      if (payload.servers) {
+        for (const server of payload.servers) {
+          state.servers.list.push(server)
+        }
       }
     },
 
@@ -56,6 +72,49 @@ export default new Vuex.Store({
     }
   },
   actions: {
-
+    validateSession({ commit }) {
+      fetch('/api/auth/session')
+        .then(response => {
+          if (response.ok) {
+            return response.json()
+          }
+        })
+        .then(json => {
+          commit('user', {
+            username: json.user.username,
+            email: json.user.email,
+            sessionId: json.sessionId
+          })
+        })
+    },
+    refreshServers({ commit }) {
+      commit('servers', {
+        loading: true
+      })
+      fetch(`/api/servers`, {
+        credentials: 'include'
+      })
+        .then(res => {
+          if (res.ok) return res.json()
+          if (res.status === 401) return router.push('/login')
+          Snackbar.open({
+            type: 'is-danger',
+            message: `Failed to acquire servers: ${res.statusText}`
+          })
+        })
+        .then(json => {
+          commit('servers', {
+            loading: false,
+            servers: [...json.owned, ...json.shared]
+          })
+        })
+        .catch(() => {
+          Snackbar.open({
+            type: 'is-danger',
+            message: `A network error occurred while fetching servers`
+          })
+        })
+        .finally(() => commit('servers', { loading: false }))
+    }
   }
 })

@@ -22,6 +22,7 @@ router.afterEach(to => {
     document.title = defaultDocumentTitle
   }
 })
+Vue.prototype.$API_URL = process.env.NODE_ENV === "production" ? '/' : 'http://localhost:8081'
 
 new Vue({
   router,

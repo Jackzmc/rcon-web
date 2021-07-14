@@ -52,7 +52,8 @@
     "rules": {
       "space-before-function-paren": "off",
       "no-return-assign": "off",
-      "quotes": "off"
+      "quotes": "off",
+      "curly": "off"
     }
   },
   "browserslist": [

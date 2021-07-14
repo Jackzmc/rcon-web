@@ -53,10 +53,7 @@ export default {
     }
   },
   created () {
-    this.$store.commit('user', {
-      name: 'John Doe',
-      email: 'john@example.com'
-    })
+    this.$store.dispatch('validateSession')
   }
 }
 </script>

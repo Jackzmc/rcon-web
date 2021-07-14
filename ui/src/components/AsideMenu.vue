@@ -4,14 +4,13 @@
       <span slot="label"> RCON Web Admin </span>
     </aside-tools>
     <div class="menu is-menu-main">
-      <template v-for="(menus, category) in menu">
-        <p :key="category" class="menu-label">
+      <template v-for="(menus, category, i) in menu">
+        <p :key="category + i" class="menu-label">
           {{ category }}
         </p>
         <aside-menu-list
           :key="category"
           :menu="menus"
-          @menu-click="menuClick"
         />
       </template>
     </div>
@@ -29,16 +28,11 @@ export default {
   props: {
     menu: {
       type: Object,
-      default: () => []
+      default: () => {}
     }
   },
   computed: {
     ...mapState(['isAsideVisible'])
-  },
-  methods: {
-    menuClick (item) {
-      //
-    }
   }
 }
 </script>
