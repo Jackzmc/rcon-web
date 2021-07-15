@@ -15,6 +15,7 @@ export default function(app: Express, db: Database) {
         owned.push({
           ...server,
           owned: true,
+          sharedWith: server.users, //TODO: fixme
           details: await server.details()
         })
       }

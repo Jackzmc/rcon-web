@@ -88,35 +88,36 @@ export default new Vuex.Store({
           })
         })
     },
-    refreshServers({ commit }) {
+    async refreshServers({ commit }) {
       commit('servers', {
         loading: true
 
       })
-      fetch(`/api/servers?full=1`, {
-        credentials: 'include'
-      })
-        .then(res => {
-          if (res.ok) return res.json()
-          if (res.status === 401) return router.push('/login')
-          Snackbar.open({
-            type: 'is-danger',
-            message: `Failed to acquire servers: ${res.statusText}`
-          })
+
+      try {
+        const res = await fetch(`/api/servers?full=1`, {
+          credentials: 'include'
         })
-        .then(json => {
+        if (res.ok) {
+          const json = await res.json()
           commit('servers', {
             loading: false,
             servers: [...json.owned, ...json.shared]
           })
+          return true
+        }
+        if (res.status === 401) router.push('/login')
+        else Snackbar.open({
+          type: 'is-danger',
+          message: `Failed to acquire servers: ${res.statusText}`
         })
-        .catch(() => {
-          Snackbar.open({
-            type: 'is-danger',
-            message: `A network error occurred while fetching servers`
-          })
+      } catch (err) {
+        Snackbar.open({
+          type: 'is-danger',
+          message: `A network error occurred while fetching servers`
         })
-        .finally(() => commit('servers', { loading: false }))
+      }
+      commit('servers', { loading: false })
     }
   }
 })

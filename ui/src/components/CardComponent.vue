@@ -17,7 +17,7 @@
         </a>
       </slot>
     </header>
-    <div :class="['card-content', ...contentClass]">
+    <div :class="cardClass">
       <slot />
     </div>
   </div>
@@ -40,7 +40,12 @@ export default {
       default: null
     },
     contentClass: {
-      type: Array
+      type: String
+    }
+  },
+  computed: {
+    cardClass() {
+      return "card-content " + this.contentClass
     }
   },
   methods: {

@@ -136,7 +136,6 @@ export default {
   },
   created () {
     this.fillChartData()
-    this.$store.dispatch('refreshServers')
   },
   mounted() {
   },

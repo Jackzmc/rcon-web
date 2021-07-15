@@ -19,7 +19,9 @@
       :show-header="servers.length > 0"
     >
       <b-table-column label="Name" field="name" sortable v-slot="props">
-        <b-icon v-if="props.row.owned" icon="crown"  size="is-small" />
+        <b-tooltip label="You are the owner of this server" position="is-right">
+          <b-icon v-if="props.row.owned" icon="crown"  size="is-small" />
+        </b-tooltip>
         {{ props.row.name }}
       </b-table-column>
       <b-table-column label="Status" sortable :custom-sort="sortStatus" v-slot="props">

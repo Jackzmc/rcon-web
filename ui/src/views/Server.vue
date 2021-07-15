@@ -1,11 +1,11 @@
 <template>
-  <div>
+<div>
+  <div v-if="server">
     <hero-bar>
       <span class=" is-uppercase">{{server.name}}</span>
-      <p class="subtitle is-6" v-if="server.status">
+      <p class="subtitle is-6" v-if="server.details.online">
         <span class="has-text-success">Online</span>
-        <span> - {{server.players.length}} players online</span>
-        <span> - 50 days uptime</span>
+        <span> - {{server.details.players.length}} players online</span>
       </p>
       <p class="subtitle is-6" v-else>
         <span class="has-text-danger">Offline</span>
@@ -37,18 +37,34 @@
           <card-component title="Server Information" icon="information" >
             <h5 class="title is-5 is-uppercase">{{server.name}}</h5>
             <p class="subtitle is-6">
-              {{connectIP}}
+              {{ connectIP }}
               <a class="is-pulled-right" :href="'steam://connect/' + connectIP">Connect</a>
             </p>
             <hr />
             <h5 class="title is-5">Game</h5>
             <p class="subtitle is-6">
-              {{$options.AppTitles[server.meta.appid]}}
-              <span class="is-pulled-right">{{server.version}}</span>
+              {{ serverType }}
+              <span class="is-pulled-right">{{server.details.version}}</span>
             </p>
+            <template v-if="server.owned">
+              <hr />
+              <h5 class="title is-5">
+                <b-icon icon="lock" />
+                Permissions
+              </h5>
+              Shared with {{ 0 }} people
+            </template>
+            <template v-else>
+              <hr />
+              <h5 class="title is-5">
+                <b-icon icon="lock" />
+                Permissions
+              </h5>
+              Not implemented
+            </template>
             <hr />
             <div class="tags">
-              <b-tag type="is-dark" v-for="tag in server.meta.tags" :key="tag">{{tag}}</b-tag>
+              <b-tag type="is-dark" v-for="tag in server.tags" :key="tag">{{tag}}</b-tag>
             </div>
           </card-component>
           <card-component title="Players" icon="account-group" >
@@ -65,6 +81,15 @@
       <server-tabs />
     </section>
   </div>
+  <div v-else class="container px-5 py-5">
+    <div class="box">
+      <h3 class="title is-3">Server Not Found</h3>
+      <p class="subtitle is-6">That server does not exist or you do not have permission to view that server.</p>
+      <hr />
+      <b-button tag="router-link" to="/" type="is-info"> Return to Dashboard </b-button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script>
@@ -107,36 +132,44 @@ export default {
         "ESCAPED: Francis",
         "ESCAPED: Louis",
         "ESCAPED: Francis"
-      ],
-      server: {
-        status: true,
-        players: [
-          { name: "Jackz", steamid: 'STEAM_' },
-          { name: "Givi", steamid: 'STEAM_' },
-          { name: "Heavenira", steamid: 'STEAM_' }
-        ],
-        name: 'server a',
-        meta: {
-          ip: '127.0.0.1',
-          port: 27015,
-          appid: 222860,
-          tags: [
-            "l4d2",
-            "test"
-          ]
-        },
-        version: '2.2.2.0 8267'
-      }
+      ]
+      // server: {
+      //   status: true,
+      //   players: [
+      //     { name: "Jackz", steamid: 'STEAM_' },
+      //     { name: "Givi", steamid: 'STEAM_' },
+      //     { name: "Heavenira", steamid: 'STEAM_' }
+      //   ],
+      //   name: 'server a',
+      //   meta: {
+      //     ip: '127.0.0.1',
+      //     port: 27015,
+      //     appid: 222860,
+      //     tags: [
+      //       "l4d2",
+      //       "test"
+      //     ]
+      //   },
+      //   version: '2.2.2.0 8267'
+      // }
     }
   },
   computed: {
     connectIP() {
-      return this.server.meta.ip + ":" + this.server.meta.port
+      return this.server ? this.server.ip + ":" + this.server.port : null
     },
     titleStack () {
       return ['Admin', 'Profile']
     },
-    ...mapState(['userName', 'userEmail'])
+    server() {
+      return this.$store.state.servers.list.find(server => server.id === this.$route.params.server)
+    },
+    serverType() {
+      if (!this.server) return null
+      if (!this.server.details.online) return 'Server Offline'
+      return this.$options.AppTitles[this.server.details.appid] || 'Unknown'
+    },
+    ...mapState(['user'])
   },
   methods: {
     deleteServer() {

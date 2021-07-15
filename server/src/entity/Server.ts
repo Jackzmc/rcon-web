@@ -76,7 +76,7 @@ export default class Server {
   directory: String
 
   @OneToMany(() => Permissions, permissions => permissions.server)
-  users!: Permissions[];
+  users!: Promise<Permissions[]>;
 
   private status;
 
@@ -104,6 +104,7 @@ export default class Server {
         host: 'lgs.jackz.me', //this.ip,
         port: 27015 //this.port
       })
+      
       return {
         online: true,
         players: state.players,
@@ -113,7 +114,7 @@ export default class Server {
           name: state.name,
           map: state.map
         },
-        appid: state.appId
+        appid: state.raw.appId
       };
     } catch(err) {
       return {

@@ -9,19 +9,19 @@ export enum PermissionFlags {
 @Entity({ name: 'permissions' })
 export default class Permissions {
 
-  @ManyToOne(() => User, user => user.permissions, { primary: true })
+  @ManyToOne(() => User, user => user.permissions, { primary: true, eager: true })
   @JoinColumn({ name: 'userId' })
-  user: Promise<User>;
+  user!: User;
 
   @ManyToOne(() => Server, server => server.users, { primary: true, eager: true })
   @JoinColumn({ name: 'serverId'})
-  server: Server;
+  server!: Server;
 
   @Column()
   flags: number
 
   constructor(user: User, server: Server, flags?: number) {
-    this.user = Promise.resolve(user)
+    this.user = user
     this.server = server
     this.flags = flags || 0
   }

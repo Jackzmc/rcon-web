@@ -53,7 +53,9 @@ export default {
     }
   },
   created () {
-    this.$store.dispatch('validateSession')
+    if (this.$store.dispatch('validateSession')) {
+      this.$store.dispatch('refreshServers')
+    }
   }
 }
 </script>
