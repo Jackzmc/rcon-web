@@ -98,13 +98,12 @@ export default function(controller: ServerController) {
       });
       res.flushHeaders();
       res.write('retry: 10000\n\n');
-
+      
       const index = instance.addStreamConnection(res)
       res.on('close', () => {
         console.log('connection closed, closing stream connection #', index)
         instance.removeStreamConnection(index)
       })
-
     }
     else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
   })

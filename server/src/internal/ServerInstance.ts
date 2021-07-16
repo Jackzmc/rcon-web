@@ -36,8 +36,6 @@ export default class ServerInstance {
                 useWatchFile: true
             })
             this.tail.on("line", (data: String) => {
-                //ignore dev:
-                if(data[0] === "$") return
                 this.lines.push(data)
                 this.lastLineDate = Date.now()
                 if(this.lines.length > MAX_LINE_COUNT) {
@@ -47,8 +45,7 @@ export default class ServerInstance {
                 for(let i = 0; i < this.connections.length; i++) {
                     const client = this.connections[i]
                     if(!client.writable) continue; //Ignore stale for now
-                    console.log(`$sending to ${i}: ${data}`)
-                    client.write(`data: ${data}\n`)
+                    client.write(`data: ${data}\n\n`)
                 }
                 
             });

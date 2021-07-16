@@ -27,7 +27,7 @@
       <div class="columns">
         <div class="column">
           <card-component title="Console" icon="console" contentClass="px-0 py-0">
-            <console :lines="serverLines" />
+            <console :lines="consoleLines" />
             <div class="buttons px-3 pb-3 pt-0">
               <b-button icon-left="refresh" type="is-info">Restart</b-button>
             </div>
@@ -52,7 +52,7 @@
                 <b-icon icon="lock" />
                 Permissions
               </h5>
-              Shared with {{ 0 }} people
+              Shared with {{ server.sharedWith.length }} people
             </template>
             <template v-else>
               <hr />
@@ -111,47 +111,7 @@ export default {
   AppTitles,
   data() {
     return {
-      serverLines: [
-        "*!* Beginning custom finale stage 6 of type 2                         [223/1976]",
-        "*!* PendingWaitAdvance false, QueuedDelayAdvances 1",
-        "Jackz ❤: it just keeps rolling",
-        "*!* Update Advancing State finale stage 6 of type 2",
-        "*!* PendingWaitAdvance false, QueuedDelayAdvances 1",
-        "*!* Beginning custom finale stage 7 of type 1",
-        "*!* PendingWaitAdvance true, QueuedDelayAdvances 0",
-        "L 07/10/2021 - 17:32:26: [l4d2_skill_detect.smx] Clear: 6 freed 2 from 7: time: 2.16 / 2.20 -- class: smoker (with shove? 0)",
-        "I Am The Liquor: pft",
-        "*!* Beginning custom finale stage 8 of type 2",
-        "*!* PendingWaitAdvance false, QueuedDelayAdvances 0",
-        "*!* Beginning custom finale stage 9 of type -1",
-        "*!* PendingWaitAdvance false, QueuedDelayAdvances 0",
-        "Jackz ❤ attacked ha_banned",
-        "L 07/10/2021 - 17:33:50: [basechat.smx] \"Jackz ❤<433><STEAM_1:0:49243767><>\" triggered sm_say (text maybe hell try to minigun the restarter)",
-        "*!* EnableEscapeTanks finale stage 9 of type -1",
-        "L 07/10/2021 - 17:34:20: [basechat.smx] \"Jackz ❤<433><STEAM_1:0:49243767><>\" triggered sm_say (text nop )",
-        "ESCAPED: Francis",
-        "ESCAPED: Louis",
-        "ESCAPED: Francis"
-      ]
-      // server: {
-      //   status: true,
-      //   players: [
-      //     { name: "Jackz", steamid: 'STEAM_' },
-      //     { name: "Givi", steamid: 'STEAM_' },
-      //     { name: "Heavenira", steamid: 'STEAM_' }
-      //   ],
-      //   name: 'server a',
-      //   meta: {
-      //     ip: '127.0.0.1',
-      //     port: 27015,
-      //     appid: 222860,
-      //     tags: [
-      //       "l4d2",
-      //       "test"
-      //     ]
-      //   },
-      //   version: '2.2.2.0 8267'
-      // }
+      consoleLines: []
     }
   },
   computed: {
@@ -179,6 +139,17 @@ export default {
         cancelText: 'No',
         type: 'is-danger'
       })
+    }
+  },
+  mounted() {
+    const src = new EventSource(`/api/servers/${this.$route.params.server}/console`, {
+      withCredentials: true
+    })
+    src.onerror = (event) => {
+      console.error('[Console] Could not get live console, activating polling mode?')
+    }
+    src.onmessage = (event) => {
+      this.consoleLines.push(event.data)
     }
   }
 }

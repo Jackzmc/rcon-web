@@ -58,7 +58,3 @@ new Database().init()
   })
 
 })
-
-setInterval(() => {
-  console.log("example message", Date.now())
-}, 10000)
