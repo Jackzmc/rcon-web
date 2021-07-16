@@ -35,7 +35,7 @@ interface ServerDetails {
 @Unique('connect_address', ["ip", "port"])
 export default class Server {
   @PrimaryColumn('varchar', { length: 16 })
-  id: String
+  id: string
   @BeforeInsert()
   private async createIDIfNotExists() {
     if(!this.id)
@@ -45,7 +45,7 @@ export default class Server {
   @Column({
     length: 64
   })
-  name: String
+  name: string
 
   @Column('int')
   type: ServerType
@@ -55,13 +55,13 @@ export default class Server {
   owner!: Promise<User>
 
   @Column({ length: 32 })
-  ip: String
+  ip: string
 
   @Column("smallint")
   port: Number
 
   @Column('simple-array')
-  tags: String[]
+  tags: string[]
 
   @CreateDateColumn()
   created: Date
@@ -73,12 +73,13 @@ export default class Server {
   version: number;
 
   @Column()
-  directory: String
+  directory: string
 
   @OneToMany(() => Permissions, permissions => permissions.server)
-  users!: Promise<Permissions[]>;
+  permissions!: Promise<Permissions[]>;
 
   private status;
+  
 
   static generateID(): Promise<string> {
     return new Promise((res) => {
@@ -91,7 +92,7 @@ export default class Server {
     })
   }
 
-  constructor(id?: String) {
+  constructor(id?: string) {
     if(id) {
       this.id = id
     }
@@ -129,5 +130,5 @@ export default class Server {
     //TODO: Implement
     return true
   }
-
+ 
 }

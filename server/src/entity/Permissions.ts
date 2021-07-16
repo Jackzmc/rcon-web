@@ -13,7 +13,7 @@ export default class Permissions {
   @JoinColumn({ name: 'userId' })
   user!: User;
 
-  @ManyToOne(() => Server, server => server.users, { primary: true, eager: true })
+  @ManyToOne(() => Server, server => server.permissions, { primary: true, eager: true })
   @JoinColumn({ name: 'serverId'})
   server!: Server;
 

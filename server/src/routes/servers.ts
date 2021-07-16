@@ -1,21 +1,22 @@
-import Database  from '../database.js'
+import Database  from '../internal/database.js'
 import { Router } from 'express'
 import { ErrorCode, checkParameters, requireAuth } from '../util';
 import { Express } from 'express'
 import Server from '../entity/Server';
+import ServerController from '../internal/ServerInstanceController.js';
 
 const router = Router()
 
-export default function(app: Express, db: Database) {
+export default function(controller: ServerController) {
   router.get('/', requireAuth, async(req, res) => {
-    const user = await db.Users.findOneOrFail(req.session.user.id, { relations: ['servers', 'permissions']})
+    const user = await controller.db.Users.findOneOrFail(req.session.user.id, { relations: ['servers', 'permissions'] })
     if (req.query.full) {
       const owned = [], shared = []
       for(const server of user.servers) {
         owned.push({
           ...server,
           owned: true,
-          sharedWith: server.users, //TODO: fixme
+          sharedWith: [], //TODO: fixme
           details: await server.details()
         })
       }
@@ -51,17 +52,17 @@ export default function(app: Express, db: Database) {
   //TODO: Query shit
   router.get('/details', requireAuth, async(req, res) => {
     if(!req.query.servers) return res.status(400).json({
-      ...app.locals.error(ErrorCode.MISSING_PARAMS),
+      ...controller.app.locals.error(ErrorCode.MISSING_PARAMS),
       query: {
         "servers": "Comma list of servers to check"
       }
     })
-    const user = await db.Users.findOneOrFail(req.session.user.id, { relations: ['servers', 'permissions']})
+    const user = await controller.db.Users.findOneOrFail(req.session.user.id, { relations: ['servers', 'permissions']})
 
     const ids: string[] = (req.query.servers as string).split(",")
     const servers = []
     for(const id in ids) {
-      const server = await db.Servers.findOne(id)
+      const server = await controller.db.Servers.findOne(id)
       if(server.hasPermission(user)) {
         servers.push({
           ...server,
@@ -72,6 +73,42 @@ export default function(app: Express, db: Database) {
     res.json(servers)
   })
 
+  router.get('/:id/logs', async(req, res) => {
+    const server = await controller.db.Servers.findOne(req.params.id)
+    if(server) {
+      const instance = controller.getInstance(server)
+      if(!instance) return res.status(500).json(controller.app.locals.error(ErrorCode.INTERNAL_SERVER_ERROR, "Could not server instance"))
+      res.json({
+        lastMessageRecieved: instance.lastLineTimestamp,
+        lines: instance.logs
+      })
+    }
+    else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
+  })
+
+  router.get('/:id/console', async(req, res) => {
+    const server = await controller.db.Servers.findOne(req.params.id)
+    if(server) {
+      const instance = controller.getInstance(server)
+      if(!instance) return res.status(500).json(controller.app.locals.error(ErrorCode.INTERNAL_SERVER_ERROR, "Could not server instance"))
+      res.set({
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream',
+        'Connection': 'keep-alive'
+      });
+      res.flushHeaders();
+      res.write('retry: 10000\n\n');
+
+      const index = instance.addStreamConnection(res)
+      res.on('close', () => {
+        console.log('connection closed, closing stream connection #', index)
+        instance.removeStreamConnection(index)
+      })
+
+    }
+    else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
+  })
+
   router.post('/', requireAuth, checkParameters([
     "name",
     "directory",
@@ -79,7 +116,7 @@ export default function(app: Express, db: Database) {
     "port"
   ]), async(req, res) => {
     //Fetch all servers with the IP and port
-    const existingServers = await db.Servers.findAndCount({
+    const existingServers = await controller.db.Servers.findAndCount({
       where: {
         ip: req.body.ip,
         port: req.body.port
@@ -88,20 +125,20 @@ export default function(app: Express, db: Database) {
 
     //Check for any pre-existing server IP:Port combos
     if(existingServers.length > 0) {
-      return res.json(app.locals.error(ErrorCode.SERVER_ALREADY_EXISTS))
+      return res.json(controller.app.locals.error(ErrorCode.SERVER_ALREADY_EXISTS))
     }
 
     //If no server exists, create a new one
-    const server = db.Servers.create({
+    const server = controller.db.Servers.create({
       id: await Server.generateID(),
       directory: req.body.directory,
       name: req.body.name,
       port: req.body.port,
       ip: req.body.ip,
-      owner: db.Users.findOneOrFail(req.session.user.id)
+      owner: controller.db.Users.findOneOrFail(req.session.user.id)
     })
 
-    await db.Servers.save(server)
+    await controller.db.Servers.save(server)
 
     res.json({
       result: 'SUCCESS',
@@ -110,14 +147,14 @@ export default function(app: Express, db: Database) {
   })
 
   router.get('/:id', requireAuth, async(req, res) => {
-    const server = await db.Servers.findOne(req.params.id)
+    const server = await controller.db.Servers.findOne(req.params.id)
     if(server) {
       return res.json({
         ...server,
         status: await server.details()
       })
     }
-    else res.status(404).json(app.locals.error(ErrorCode.SERVER_NOT_FOUND))
+    else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
   })
 
   return router

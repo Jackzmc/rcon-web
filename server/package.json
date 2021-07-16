@@ -9,11 +9,16 @@
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "better-srcds-log-receiver": "^1.0.2",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
     "gamedig": "^3.0.7",
     "mysql2": "^2.2.5",
+    "tail": "^2.2.3",
+    "telnet-client": "^1.4.9",
+    "telnet-stream": "^1.0.5",
+    "telnetlib": "^1.0.0",
     "typeorm": "^0.2.34",
     "typeorm-store": "^2.0.0"
   },

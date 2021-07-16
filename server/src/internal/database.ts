@@ -1,11 +1,11 @@
 import "reflect-metadata";
 import { createConnection, Connection, Repository } from "typeorm";
 
-import Server, { ServerType } from './entity/Server'
-import User from './entity/User';
-import Permissions from './entity/Permissions'
+import Server, { ServerType } from '../entity/Server'
+import User from '../entity/User';
+import Permissions from '../entity/Permissions'
 import bcrypt from 'bcrypt';
-import { Session } from './entity/Session';
+import { Session } from '../entity/Session';
 
 export default class Database {
   #connection: Connection = null

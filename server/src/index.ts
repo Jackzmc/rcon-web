@@ -1,6 +1,6 @@
 import express from 'express'
 import dotenv from 'dotenv'
-import Database from './database'
+import Database from './internal/database'
 import "reflect-metadata"
 import Session from 'express-session'
 import Cors from 'cors'
@@ -14,6 +14,7 @@ const app = express()
 import { generateError } from './util'
 import Servers from './routes/servers'
 import Auth from './routes/auth'
+import ServerController from './internal/ServerInstanceController';
 
 app.locals.error = generateError
 app.use(express.json())
@@ -25,6 +26,8 @@ if(process.env.NODE_ENV === "production") {
 
 new Database().init()
 .then(db => {
+  const controller = new ServerController(app, db)
+
   //Setup sessions
   app.use(Session({
     secret: process.env.SESSION_SECRET,
@@ -47,11 +50,15 @@ new Database().init()
     },
     methods: "GET, PUT, POST, DELETE"
   }))
-  app.use('/api/auth', Auth(app, db))
-  app.use('/api/servers', Servers(app, db))
+  app.use('/api/auth', Auth(controller))
+  app.use('/api/servers', Servers(controller))
 
   app.listen(WEB_PORT, () => {
     console.info('[Server] Listening on :' + WEB_PORT)
   })
 
 })
+
+setInterval(() => {
+  console.log("example message", Date.now())
+}, 10000)
