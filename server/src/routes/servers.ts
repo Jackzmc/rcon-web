@@ -120,8 +120,12 @@ export default function(controller: ServerController) {
     if(server) {
       const instance = controller.getInstance(server)
       if(!instance) return res.status(500).json(controller.app.locals.error(ErrorCode.INTERNAL_SERVER_ERROR, "Could not server instance"))
-      const response = await instance.sendCommand(req.body, user)
-      res.send(response)
+      try {
+        const response = await instance.sendCommand(req.body, user)
+        res.send(response)
+      } catch(err) {
+        res.status(500).json(controller.app.locals.error(ErrorCode.RCON_UNAVAILABLE))
+      }
     }
     else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
   })

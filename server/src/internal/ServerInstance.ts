@@ -113,9 +113,8 @@ export default class ServerInstance {
 
     // Sends a command to server, via RCON
     async sendCommand(command: string, user?: User) {
-        if(!this.rcon) {
-            if(!await this.setupRcon())
-                return Promise.reject(new Error("RCON not connected"))
+        if(!this.rcon && !await this.setupRcon()) {
+            return Promise.reject(new Error("RCON not connected"))
         }
         // Setup rcon idle timeout
         if(!this.rconIdleTimer) clearTimeout(this.rconIdleTimer)

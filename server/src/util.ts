@@ -4,11 +4,13 @@ export enum ErrorCode {
   SERVER_ALREADY_EXISTS = "SERVER_ALREADY_EXISTS",
   UNAUTHORIZED = "UNAUTHORIZED",
   INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
+  RCON_UNAVAILABLE = "RCON_UNAVAILABLE",
 }
 const messages = {
   SERVER_NOT_FOUND: "Server was not found",
   MISSING_PARAMS: "Parameters are missing from your request",
-  UNAUTHORIZED: "No active account session"
+  UNAUTHORIZED: "No active account session",
+  RCON_UNAVAILABLE: "Server could not be reached"
 }
 
 export function generateError(code: ErrorCode, message?: String) {
