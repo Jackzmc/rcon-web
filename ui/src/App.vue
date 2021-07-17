@@ -37,18 +37,14 @@ export default {
             label: 'Settings'
           }
         ],
-        Servers: [
-          {
-            to: '/server/a',
-            icon: 'server',
-            label: 'Server 1'
-          },
-          {
-            to: '/server/2',
-            icon: 'server',
-            label: 'Server 2'
-          }
-        ]
+        Servers: this.$store.state.servers.list
+          .map(server => {
+            return {
+              to: `/server/${server.id}`,
+              icon: 'server',
+              label: server.name
+            }
+          })
       }
     }
   },
