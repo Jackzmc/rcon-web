@@ -27,7 +27,7 @@ export default class ServerInstance {
 
     constructor(server: Server) {
         this.server = server
-        
+
         // Setup the log reader:
         this.logFile = join(this.server.directory, "console.log")
         if(this.server.directory) {
@@ -47,7 +47,7 @@ export default class ServerInstance {
         if(!this.logFile) return // If the log file does not exist, just silently ignore
         // If has not been setup, then set it up:
         if(!this.tail) {
-            this.tail = new Tail(`S:\\Jackz\\Documents\\Code\\Projects\\rcon-web\\server\\console.log`, {
+            this.tail = new Tail(this.logFile, {
                 useWatchFile: true
             })
             this.tail.on("line", (data: String) => {
