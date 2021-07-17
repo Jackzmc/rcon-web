@@ -1,10 +1,11 @@
 import Server from '../entity/Server';
 import { Tail } from 'tail';
 import { Response } from 'express'
-import { existsSync } from 'fs'
 import { join } from 'path'
+import readLastLines from 'read-last-lines';
+import User from 'entity/User';
 
-const MAX_LINE_COUNT = 1800
+const MAX_LINE_COUNT = 100
 
 export default class ServerInstance {
     id: string
@@ -16,20 +17,29 @@ export default class ServerInstance {
     private lastLineDate: Number;
     private connections: Response[] = []
 
-    //TODO: Implement system to only watch on demand
+    private logFile: string = null
 
     constructor(server: Server) {
         this.id = server.id
         this.directory = server.directory
+
+        // Setup the logg reader:
+        this.logFile = join(this.directory, "console.log")
+        if(this.directory) {
+            readLastLines.read(this.logFile, MAX_LINE_COUNT)
+                .then((lines) => this.lines = lines.split("\n"))
+                .catch(() => {  //File or folder probably doesn't exist
+                    this.logFile = null
+                    if(process.env.NODE_ENV !== 'production') 
+                        console.warn(`[Server/${this.id}] Cannot watch server, log file not found.`)
+                })
+
+        }
         //TODO: Read console.log on load, get X lines, use variable if cannot read file for watch() check
     }
 
     private watch() {
-        //`${this.directory}/console.log`
-        //Removed for testing:
-        /*if(!this.directory || !existsSync(join(this.directory, "console.log"))) {
-            return console.warn(`[Server/${this.id}] Cannot watch server, no console.log or invalid directory`)
-        }*/
+        if(!this.logFile) return // If the log file does not exist, just silently ignore
         // If has not been setup, then set it up:
         if(!this.tail) {
             this.tail = new Tail(`S:\\Jackz\\Documents\\Code\\Projects\\rcon-web\\server\\console.log`, {
@@ -58,8 +68,9 @@ export default class ServerInstance {
         }
     }
 
-    // Adds a expressJS Resposne stream to connection list, returns index
+    // Adds an expressJS Resposne stream to connection list, returns index
     addStreamConnection(res: Response): number {
+        // Start watching the log file if not already
         if(!this.tailActive) {
             this.watch()
         }
@@ -67,13 +78,19 @@ export default class ServerInstance {
         // If log reader inactive, reactivate
     }
 
+    // Remove an expressJS Response stream from list by its index
     removeStreamConnection(index: number) {
         this.connections.splice(index, 1)
         // If there is no more connections, shut down log reader
-        if(this.connections.length == 0) {
+        if(this.connections.length == 0 && this.tailActive) {
             this.tailActive = false
             this.tail.unwatch()
         }
+    }
+
+    // Sends a command to server, via RCON
+    sendCommand(command: String, user?: User) {
+        
     }
 
     get logs() {
@@ -82,6 +99,10 @@ export default class ServerInstance {
 
     get lastLineTimestamp() { 
         return this.lastLineDate
+    }
+
+    get consoleAvailable() {
+        return this.logFile != null
     }
 
 }

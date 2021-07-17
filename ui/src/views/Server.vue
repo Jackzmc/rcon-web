@@ -27,7 +27,7 @@
       <div class="columns">
         <div class="column">
           <card-component title="Console" icon="console" contentClass="px-0 py-0">
-            <console :lines="consoleLines" />
+            <console />
             <div class="buttons px-3 pb-3 pt-0">
               <b-button icon-left="refresh" type="is-info">Restart</b-button>
             </div>
@@ -111,7 +111,7 @@ export default {
   AppTitles,
   data() {
     return {
-      consoleLines: []
+
     }
   },
   computed: {
@@ -139,17 +139,6 @@ export default {
         cancelText: 'No',
         type: 'is-danger'
       })
-    }
-  },
-  mounted() {
-    const src = new EventSource(`/api/servers/${this.$route.params.server}/console`, {
-      withCredentials: true
-    })
-    src.onerror = (event) => {
-      console.error('[Console] Could not get live console, activating polling mode?')
-    }
-    src.onmessage = (event) => {
-      this.consoleLines.push(event.data)
     }
   }
 }

@@ -73,7 +73,7 @@ export default function(controller: ServerController) {
     res.json(servers)
   })
 
-  router.get('/:id/logs', async(req, res) => {
+  router.get('/:id/logs', requireAuth, async(req, res) => {
     const server = await controller.db.Servers.findOne(req.params.id)
     if(server) {
       const instance = controller.getInstance(server)
@@ -86,7 +86,7 @@ export default function(controller: ServerController) {
     else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
   })
 
-  router.get('/:id/console', async(req, res) => {
+  router.get('/:id/console', requireAuth, async(req, res) => {
     const server = await controller.db.Servers.findOne(req.params.id)
     if(server) {
       const instance = controller.getInstance(server)
@@ -97,8 +97,13 @@ export default function(controller: ServerController) {
         'Connection': 'keep-alive'
       });
       res.flushHeaders();
+      if(!instance.consoleAvailable) {
+        res.write('data: Console logging is unavailable for this server.\n\nevent: close\ndata: CONSOLE_UNAVAILABLE\n\n')
+        return
+      }
+
       res.write('retry: 10000\n\n');
-      
+
       const index = instance.addStreamConnection(res)
       res.on('close', () => {
         console.log('connection closed, closing stream connection #', index)
@@ -106,6 +111,11 @@ export default function(controller: ServerController) {
       })
     }
     else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
+  })
+
+  router.post('/:id/command', requireAuth, async(req, res) => {
+    //TODO: Implement rcon 
+    res.status(501).json({code: 'NOT_IMPLEMENTED', error: true})
   })
 
   router.post('/', requireAuth, checkParameters([

@@ -6,21 +6,59 @@
     </li>
   </ul>
   <div class="console-input-container">
-    <b-input icon="console-line" size="is-small" v-model="command" type="text" class="console-input" placeholder="Enter a command" />
+    <b-input v-model="command"
+      icon="console-line" size="is-small"  type="text" class="console-input" placeholder="Enter a command"
+      @keyup.enter.native="sendCommand"
+    />
   </div>
 </div>
 </template>
 
 <script>
 export default {
-  props: {
-    lines: {
-      type: Array
-    }
-  },
   data() {
     return {
-      command: null
+      command: null,
+      lines: []
+    }
+  },
+  methods: {
+    sendCommand() {
+      const command = this.command
+      this.command = null
+      fetch(`/api/servers/${this.$route.params.server}/command`, {
+        method: 'POST',
+        data: command
+      })
+        .then(response => {
+          // Response should return RCON response, but logger should also catch it, so ignore
+          if (response.ok) return
+          this.$buefy.snackbar.open({
+            type: 'is-danger',
+            message: 'Could not send command: ' + response.statusText
+          })
+        })
+        .catch(() => {
+          this.$buefy.snackbar.open({
+            type: 'is-danger',
+            message: 'A network error occurred sending command'
+          })
+        })
+    }
+  },
+  created() {
+    const src = new EventSource(`/api/servers/${this.$route.params.server}/console`, {
+      withCredentials: true
+    })
+    src.onerror = (event) => {
+      console.error('[Console] Could not get live console, activating polling mode?')
+    }
+    src.addEventListener('close', (event) => {
+      console.debug('received close event of reason:', event.data, 'terminating')
+      src.close()
+    })
+    src.onmessage = (event) => {
+      this.lines.push(event.data)
     }
   }
 }
