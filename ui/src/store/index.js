@@ -93,14 +93,15 @@ export default new Vuex.Store({
           router.push('/login')
         })
     },
-    async refreshServers({ commit }) {
+    async refreshServers({ commit }, full = false) {
       commit('servers', {
         loading: true
 
       })
 
       try {
-        const res = await fetch(`/api/servers?full=1`, {
+        const query = full ? '?full=1' : ''
+        const res = await fetch(`/api/servers${query}`, {
           credentials: 'include'
         })
         if (res.ok) {

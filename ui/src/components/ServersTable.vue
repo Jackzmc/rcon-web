@@ -25,11 +25,11 @@
         {{ props.row.name }}
       </b-table-column>
       <b-table-column label="Status" sortable :custom-sort="sortStatus" v-slot="props">
-        <span class="has-text-success" v-if="props.row.details.online">Online</span>
+        <span class="has-text-success" v-if="props.row.details&&props.row.details.online">Online</span>
         <span class="has-text-danger" v-else>Offline</span>
       </b-table-column>
       <b-table-column label="Players" sortable :custom-sort="sortPlayers" v-slot="props">
-        <template v-if="props.row.details.online">
+        <template v-if="props.row.details&&props.row.details.online">
           {{ props.row.details.players.length }} / {{ props.row.details.maxplayers }}
         </template>
       </b-table-column>
