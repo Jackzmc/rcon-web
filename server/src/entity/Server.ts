@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryColumn, BeforeInsert, UpdateDateColumn, CreateDa
 import User from './User';
 import Permissions from './Permissions'
 
-import crypto from 'crypto'
+import { nanoid } from 'nanoid'
 import Gamedig from 'gamedig'
 
 export const enum ServerType {
@@ -87,14 +87,7 @@ export default class Server {
   
 
   static generateID(): Promise<string> {
-    return new Promise((res) => {
-      crypto.randomBytes(12, (err, buf) => {
-          if(err) throw err;
-          const enc = buf.toString('base64');
-          if(enc.length !== 16) throw 'invalid';
-          res(enc);
-      });
-    })
+    return Promise.resolve(nanoid())
   }
 
   constructor(id?: string) {

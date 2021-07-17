@@ -76,16 +76,21 @@ export default new Vuex.Store({
     validateSession({ commit }) {
       fetch('/api/auth/session')
         .then(response => {
-          if (response.ok) {
-            return response.json()
+          if (response.status === 200) {
+            response.json()
+              .then(json => {
+                commit('user', {
+                  username: json.user.username,
+                  email: json.user.email,
+                  sessionId: json.sessionId
+                })
+              })
+          } else {
+            router.push('/login')
           }
         })
-        .then(json => {
-          commit('user', {
-            username: json.user.username,
-            email: json.user.email,
-            sessionId: json.sessionId
-          })
+        .catch(() => {
+          router.push('/login')
         })
     },
     async refreshServers({ commit }) {

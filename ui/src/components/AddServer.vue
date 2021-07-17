@@ -5,81 +5,61 @@
   >
     <template v-if="!collapsed">
     <form @submit.prevent="submit">
-      <b-field label="From" horizontal>
-        <b-field>
+      <b-field label="Server Name" horizontal>
+        <b-field :message="idName">
           <b-input
-            icon="account"
-            placeholder="Name"
-            name="name"
+            v-model="form.name"
+            icon="format-title"
+            placeholder="Server Name"
+            required
+          />
+        </b-field>
+      </b-field>
+      <b-field label="File Directory" horizontal>
+        <b-field message="Path is required for log access">
+          <b-input
+            v-model="form.directory"
+            icon="folder"
+            placeholder="/home/steam/my-server-folder/"
+            required
+          />
+        </b-field>
+      </b-field>
+      <b-field label="IP:Port" horizontal>
+        <b-field message="Need for RCON connection">
+          <b-input
+            v-model="form.ip"
+            placeholder="localhost"
             required
           />
         </b-field>
         <b-field>
           <b-input
-            icon="email"
-            type="email"
-            placeholder="E-mail"
-            name="email"
+            v-model="form.port"
+            placeholder="27015"
             required
           />
         </b-field>
       </b-field>
-      <b-field message="Do not enter the leading zero" horizontal>
+      <b-field label="RCON Password" horizontal>
         <b-field>
-          <p class="control">
-            <a class="button is-static">
-              +44
-            </a>
-          </p>
-          <b-inputtype="tel" name="phone" expanded />
+          <b-input
+            v-model="form.rcon_password"
+            icon="key"
+            placeholder=""
+            required
+          />
         </b-field>
       </b-field>
-      <b-field label="Department" horizontal>
-        <b-select
-          placeholder="Select a department"
-          required
-        >
-          <option
-            v-for="(department, index) in departments"
-            :key="index"
-            :value="department"
-          >
-            {{ department }}
-          </option>
-        </b-select>
-      </b-field>
-      <hr />
-      <b-field label="Subject" message="Message subject" horizontal>
-        <b-input
-          placeholder="e.g. Partnership proposal"
-          required
-        />
-      </b-field>
-      <b-field
-        label="Question"
-        message="Your question. Max 255 characters"
-        horizontal
-      >
-        <b-input
-          type="textarea"
-          placeholder="Explain how we can help you"
-          maxlength="255"
-          required
-        />
-      </b-field>
-      <hr />
       <b-field horizontal>
-        <b-field grouped>
-          <div class="control">
-            <b-button native-type="submit" type="is-primary"
-              >Submit</b-button
-            >
-          </div>
-          <div class="control">
-            <b-button type="is-primary is-outlined" @click="reset"
-              >Reset</b-button
-            >
-          </div>
+        <b-field>
+          <b-button
+            :loading="form.loading"
+            tag="input"
+            native-type="submit"
+            type="is-info"
+            value="Add Server"
+          />
         </b-field>
       </b-field>
     </form>
@@ -96,7 +76,79 @@ export default {
   },
   data() {
     return {
-      collapsed: false
+      collapsed: false,
+      form: {
+        name: null,
+        directory: null,
+        ip: null,
+        port: 27015,
+        rcon_password: null,
+        loading: false
+      }
+    }
+  },
+  computed: {
+    idName() {
+      if (!this.form.name) return
+      const id = this.form.name
+        .replace(/[^a-zA-Z0-9-]/, '')
+        .replace(/\s/, '-')
+
+      return `ID will be ${id}`
+    }
+  },
+  methods: {
+    submit() {
+      this.loading = true
+      fetch(`/api/servers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: this.form.name,
+          directory: this.form.directory,
+          ip: this.form.ip,
+          port: this.form.port,
+          rcon_password: this.form.rcon_password
+        })
+      })
+        .then(res => res.json())
+        .then(json => {
+          if (json.result !== "SUCCESS") {
+            const message = json.message ? `${json.code} - ${json.message}` : json.code
+            this.$buefy.dialog.alert({
+              type: 'is-danger',
+              title: 'Error',
+              message: `<b>Server returned an error:</b><br>${message}`
+            })
+          } else {
+            this.form = {
+              name: null,
+              directory: null,
+              ip: null,
+              port: 27015,
+              rcon_password: null,
+              loading: false
+            }
+            this.$buefy.snackbar.open({
+              type: 'is-success',
+              message: `Successfully created server`,
+              actionText: 'View',
+              onAction: () => {
+                this.$router.push(`/server/${json.id}`)
+              }
+            })
+          }
+        })
+        .catch(() => {
+          this.$buefy.dialog.alert({
+            type: 'is-danger',
+            title: 'Error',
+            message: `A network error occurred while submitting.`
+          })
+        })
+        .finally(() => this.loading = false)
     }
   }
 }

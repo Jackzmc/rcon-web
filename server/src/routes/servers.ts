@@ -1,9 +1,9 @@
-import Database  from '../internal/database.js'
 import { Router } from 'express'
 import { ErrorCode, checkParameters, requireAuth } from '../util';
-import { Express } from 'express'
 import Server from '../entity/Server';
 import ServerController from '../internal/ServerInstanceController.js';
+
+import fs from 'fs/promises'
 
 const router = Router()
 
@@ -130,41 +130,73 @@ export default function(controller: ServerController) {
     else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
   })
 
-  router.post('/', requireAuth, checkParameters([
+  router.post('/:id?', requireAuth, checkParameters([
     "name",
     "directory",
     "ip",
-    "port"
+    "port",
+    "rcon_password"
   ]), async(req, res) => {
-    //Fetch all servers with the IP and port
+    const port = parseInt(req.body.port)
+    if(isNaN(port)) {
+      return res.status(400).json({
+        code: 'INVALID_PORT_NUMBER',
+        message: 'Port is not a valid number'
+      })
+    }
+
+    // Fetch all servers with the IP and port
     const existingServers = await controller.db.Servers.findAndCount({
-      where: {
-        ip: req.body.ip,
-        port: req.body.port
-      },
+      where: [
+        {
+          ip: req.body.ip,
+          port: port
+        }
+      ],
     })
 
-    //Check for any pre-existing server IP:Port combos
-    if(existingServers.length > 0) {
+    // Check for any pre-existing server IP:Port combos
+    if(existingServers[1] > 0) {
       return res.json(controller.app.locals.error(ErrorCode.SERVER_ALREADY_EXISTS))
     }
 
-    //If no server exists, create a new one
-    const server = controller.db.Servers.create({
-      id: await Server.generateID(),
-      directory: req.body.directory,
-      name: req.body.name,
-      port: req.body.port,
-      ip: req.body.ip,
-      owner: controller.db.Users.findOneOrFail(req.session.user.id)
-    })
+    try {
+      const stat = await fs.stat(req.body.directory)
+      if (!stat.isDirectory) {
+        res.status(400).json({
+          code: 'FOLDER_INVALID',
+          message: 'Specified directory is not valid folder'
+        })
+      }
 
-    await controller.db.Servers.save(server)
+      try {
+        // If no server exists, create a new one
+        const server = controller.db.Servers.create({
+          id: req.params.id || await Server.generateID(),
+          directory: req.body.directory,
+          name: req.body.name,
+          port: port,
+          ip: req.body.ip,
+          rconPass: req.body.rcon_password,
+        })
+        server.owner = controller.db.Users.findOneOrFail(req.session.user.id)
 
-    res.json({
-      result: 'SUCCESS',
-      id: server.id
-    })
+        await controller.db.Servers.save(server)
+
+        res.json({
+          result: 'SUCCESS',
+          id: server.id
+        })
+      } catch(err) {
+        res.status(500).json(controller.app.locals.error(ErrorCode.INTERNAL_SERVER_ERROR, err.message))
+      }
+    } catch(err) {
+      res.status(400).json({
+        code: 'FOLDER_NOT_EXIST',
+        message: 'Specified folder does not exist',
+        error: true
+      })
+    }
   })
 
   router.get('/:id', requireAuth, async(req, res) => {

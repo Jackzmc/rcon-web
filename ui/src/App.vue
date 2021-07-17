@@ -26,11 +26,7 @@ export default {
             icon: 'desktop-mac',
             label: 'Dashboard'
           },
-          {
-            to: '/management',
-            icon: 'database',
-            label: 'Server Management'
-          },
+
           {
             to: '/settings',
             icon: 'settings',
@@ -45,6 +41,13 @@ export default {
               label: server.name
             }
           })
+          .concat([
+            {
+              to: '/management',
+              icon: 'plus',
+              label: 'Add Server'
+            }
+          ])
       }
     }
   },
