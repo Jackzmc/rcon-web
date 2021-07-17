@@ -62,14 +62,18 @@
               </h5>
               Not implemented
             </template>
-            <hr />
-            <div class="tags">
-              <b-tag type="is-dark" v-for="tag in server.tags" :key="tag">{{tag}}</b-tag>
-            </div>
+            <template v-if="server.tags.length > 0">
+              <hr />
+              <div class="tags">
+                <b-tag type="is-dark" v-for="tag in server.tags" :key="tag">{{tag}}</b-tag>
+              </div>
+            </template>
           </card-component>
           <card-component title="Players" icon="account-group" >
-            <div class="columns is-multiline">
-              <div class="column is-6 px-0 py-0" v-for="player in server.players" :key="player.steamid">
+            <p v-if="!server.details.online">Server is offline</p>
+            <p v-if="server.details.players.length == 0">No players are online</p>
+            <div class="columns is-multiline" v-else>
+              <div class="column is-6 px-0 py-0" v-for="player in server.details.players" :key="player.steamid">
                 <a class="px-2 py-2 mx-0 my-0 player">
                   {{player.name}}
                 </a>
