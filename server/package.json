@@ -15,6 +15,7 @@
     "express-session": "^1.17.2",
     "gamedig": "^3.0.7",
     "mysql2": "^2.2.5",
+    "rcon-srcds": "^2.0.1",
     "read-last-lines": "^1.8.0",
     "tail": "^2.2.3",
     "telnet-client": "^1.4.9",

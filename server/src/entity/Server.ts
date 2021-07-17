@@ -58,7 +58,7 @@ export default class Server {
   ip: string
 
   @Column("smallint")
-  port: Number
+  port: number
 
   @Column('simple-array')
   tags: string[]
@@ -75,8 +75,13 @@ export default class Server {
   @Column()
   directory: string
 
+  // TODO: In future, implement more secure way of storing rcon password?
+  @Column({ select: false })
+  rconPass: string
+
   @OneToMany(() => Permissions, permissions => permissions.server)
   permissions!: Promise<Permissions[]>;
+
 
   private status;
   

@@ -1326,6 +1326,11 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
+rcon-srcds@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/rcon-srcds/-/rcon-srcds-2.0.1.tgz#c5be81924d3478b020f6b29f8f32edacea070a61"
+  integrity sha512-MhfL5DwFM3NHKb5Zf0xjR5mLZfvtvMFGm7lpQwJTn0dmAFMpd6exzn4Xl9Abc2sxwe3QCQYyZ1fanabCmj06vA==
+
 read-last-lines@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/read-last-lines/-/read-last-lines-1.8.0.tgz#4f94d4345ece7b8083ebb71c5fcdf60bd7afb9cc"

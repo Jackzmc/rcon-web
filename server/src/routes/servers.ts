@@ -115,7 +115,15 @@ export default function(controller: ServerController) {
 
   router.post('/:id/command', requireAuth, async(req, res) => {
     //TODO: Implement rcon 
-    res.status(501).json({code: 'NOT_IMPLEMENTED', error: true})
+    const user = await controller.db.Users.findOneOrFail(req.session.user.id)
+    const server = await controller.db.Servers.findOne(req.params.id)
+    if(server) {
+      const instance = controller.getInstance(server)
+      if(!instance) return res.status(500).json(controller.app.locals.error(ErrorCode.INTERNAL_SERVER_ERROR, "Could not server instance"))
+      const response = await instance.sendCommand(req.body, user)
+      res.send(response)
+    }
+    else res.status(404).json(controller.app.locals.error(ErrorCode.SERVER_NOT_FOUND))
   })
 
   router.post('/', requireAuth, checkParameters([

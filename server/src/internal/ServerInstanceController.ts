@@ -22,7 +22,6 @@ export default class ServerController {
 
     addInstance(instance: ServerInstance) {
         this.instances.push(instance)
-        console.log('added instance', instance.id)
     }
 
     getInstanceById(id: String) {
