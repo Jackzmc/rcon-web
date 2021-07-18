@@ -11,28 +11,40 @@ export default function(controller: ServerController) {
   router.get('/', requireAuth, async(req, res) => {
     const user = await controller.db.Users.findOneOrFail(req.session.user.id, { relations: ['servers', 'permissions'] })
     if (req.query.full) {
-      const owned = [], shared = []
+      const ownedPromises = [], sharedPromises = []
       for(const server of user.servers) {
-        owned.push({
-          ...server,
-          owned: true,
-          sharedWith: [], //TODO: fixme
-          details: await server.details()
-        })
+        ownedPromises.push(new Promise(async(resolve) => {
+          return resolve({
+            ...server,
+            owned: true,
+            sharedWith: [], //TODO: fixme
+            details: await server.details()
+          })
+        }))
       }
 
       for(const permission of user.permissions) {
-        shared.push({
-          ...permission.server,
-          owned: false,
-          permissions: permission.flags,
-          details: await permission.server.details()
-        })
+        sharedPromises.push(new Promise(async(resolve) => {
+          return resolve({
+            ...permission.server,
+            owned: true,
+            sharedWith: [], //TODO: fixme
+            details: await permission.server.details()
+          })
+        }))
       }
+
+      const timestamp = Date.now()
+
+      const owned = await Promise.all(ownedPromises)
+      const shared = await Promise.all(sharedPromises)
 
       res.json({
         owned,
-        shared
+        shared,
+        meta: {
+          fetchTime: Date.now() - timestamp
+        }
       })
     } else {
       res.json({
