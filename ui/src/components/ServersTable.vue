@@ -36,7 +36,7 @@
       <b-table-column label="Created" v-slot="props">
         <small class="has-text-grey is-abbr-like" :title="props.row.created">{{ props.row.created }}</small>
       </b-table-column>
-      <b-table-column custom-key="actions" cell-class="is-actions-cell" v-slot="props">
+      <b-table-column custom-key="actions" cell-class="is-actions-cell" v-slot="props" header-class="mx-0 px-0">
         <div class="buttons is-right">
           <b-button tag="router-link" :to="'/server/' + props.row.id" size="is-small" type="is-info" >
             <span>View</span>
@@ -46,10 +46,14 @@
             :to="'/server/' + props.row.id + '/edit'"
           >
             <b-icon icon="lead-pencil" size="is-small"/>
+            <span>Edit</span>
           </b-button>
-          <button v-if="props.row.owned" class="button is-small is-danger" type="button" @click.prevent="trashModal(props.row)">
-            <b-icon icon="trash-can" size="is-small"/>
-          </button>
+          <b-tooltip type="is-danger" :active="!props.row.owned" label="You are not the owner of this server" position="is-left">
+            <b-button :disabled="!props.row.owned" class="is-small is-danger" type="button" @click.prevent="trashModal(props.row)">
+              <b-icon icon="trash-can" size="is-small"/>
+              <span>Delete</span>
+            </b-button>
+          </b-tooltip>
         </div>
       </b-table-column>
 
