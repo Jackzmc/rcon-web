@@ -6,7 +6,7 @@
     </li>
   </ul>
   <div class="console-input-container">
-    <b-input v-model="command"
+    <b-input v-model="command" v-show="allowSend"
       icon="console-line" size="is-small"  type="text" class="console-input" placeholder="Enter a command"
       @keyup.enter.native="sendCommand"
     />
@@ -16,6 +16,12 @@
 
 <script>
 export default {
+  props: {
+    allowSend: {
+      type: Boolean,
+      default: true
+    }
+  },
   data() {
     return {
       command: null,

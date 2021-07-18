@@ -78,7 +78,7 @@ export default class ServerInstance {
         if(!this.rcon || !this.rcon.connected) {
             // Setup a new rcon connection
             try {
-                this.rcon = new Rcon({ host: this.server.ip, port: this.server.port });
+                this.rcon = new Rcon({ host: this.server.ip, port: this.server.port, timeout: 3000 });
                 await this.rcon.authenticate(this.server.rconPass);
                 return true
             } catch(error) {

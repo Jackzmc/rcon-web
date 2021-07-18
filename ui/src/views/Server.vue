@@ -2,13 +2,16 @@
 <div>
   <div v-if="server">
     <hero-bar>
-      <span class=" is-uppercase">{{server.name}}</span>
-      <p class="subtitle is-6" v-if="server.details && server.details.online">
-        <span class="has-text-success">Online</span>
-        <span> - {{server.details.players.length}} players online</span>
-      </p>
-      <p class="subtitle is-6" v-else>
-        <span class="has-text-danger">Offline</span>
+      <span class="is-uppercase">{{server.name}}</span>
+      <p class="subtitle is-6">
+        <template v-if="reachable">
+          <template v-if="server.details.online">
+            <span class="has-text-success">Online</span>
+            <span> - {{server.details.players.length}} players online</span>
+          </template>
+          <span v-else class="has-text-danger">Offline</span>
+        </template>
+        <span v-else class="has-text-danger">Server unreachable</span>
       </p>
       <div class="buttons" slot="right">
         <b-button tag="router-link" slot="right" type="is-warning" icon-left="lead-pencil"
@@ -27,9 +30,9 @@
       <div class="columns">
         <div class="column">
           <card-component title="Console" icon="console" contentClass="px-0 py-0">
-            <console />
+            <console :allow-send="reachable" />
             <div class="buttons px-3 pb-3 pt-0">
-              <b-button icon-left="refresh" type="is-info">Restart</b-button>
+              <b-button :disabled="!reachable" icon-left="refresh" type="is-info">Restart</b-button>
             </div>
           </card-component>
         </div>
@@ -44,7 +47,7 @@
             <h5 class="title is-5">Game</h5>
             <p class="subtitle is-6">
               {{ serverType }}
-              <span class="is-pulled-right">{{server.details ? server.details.version : null}}</span>
+              <span class="is-pulled-right">{{reachable ? server.details.version : null}}</span>
             </p>
             <template v-if="server.owned">
               <hr />
@@ -69,7 +72,7 @@
               </div>
             </template>
           </card-component>
-          <card-component title="Players" icon="account-group" v-if="server.details">
+          <card-component title="Players" icon="account-group" v-if="reachable">
             <p v-if="!server.details.online">Server is offline</p>
             <p v-if="server.details.players.length == 0">No players are online</p>
             <div class="columns is-multiline" v-else>
@@ -127,6 +130,9 @@ export default {
     },
     server() {
       return this.$store.state.servers.list.find(server => server.id === this.$route.params.server)
+    },
+    reachable() {
+      return this.server && !!this.server.details
     },
     serverType() {
       if (!this.server?.details) return "Server cannot be reached"
