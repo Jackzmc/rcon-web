@@ -100,8 +100,9 @@ export default class Server {
     try {
       const state = await Gamedig.query({
         type: Protocols[this.type],
-        host: 'lgs.jackz.me', //this.ip,
-        port: 27015 //this.port
+        host: this.ip,
+        port: this.port,
+        socketTimeout: 1500
       })
       
       return {
@@ -118,7 +119,7 @@ export default class Server {
     } catch(err) {
       return {
         online: false,
-        players: null,
+        players: [],
         version: null
       }
     }
