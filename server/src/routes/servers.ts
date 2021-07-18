@@ -50,12 +50,12 @@ export default function(controller: ServerController) {
       res.json({
         owned: user.servers
           .map(server => {
-            return { ...server, owned: true }
+            return { ...server, owned: true, sharedWith: [] }
           }),
         shared: user.permissions
           .map(permissions => permissions.server)
           .map(server => {
-            return { ...server, owned: false }
+            return { ...server, owned: false, sharedWith: [] }
           }),
       })
     }

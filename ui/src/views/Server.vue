@@ -3,7 +3,7 @@
   <div v-if="server">
     <hero-bar>
       <span class=" is-uppercase">{{server.name}}</span>
-      <p class="subtitle is-6" v-if="server.details.online">
+      <p class="subtitle is-6" v-if="server.details && server.details.online">
         <span class="has-text-success">Online</span>
         <span> - {{server.details.players.length}} players online</span>
       </p>
@@ -44,7 +44,7 @@
             <h5 class="title is-5">Game</h5>
             <p class="subtitle is-6">
               {{ serverType }}
-              <span class="is-pulled-right">{{server.details.version}}</span>
+              <span class="is-pulled-right">{{server.details ? server.details.version : null}}</span>
             </p>
             <template v-if="server.owned">
               <hr />
@@ -69,7 +69,7 @@
               </div>
             </template>
           </card-component>
-          <card-component title="Players" icon="account-group" >
+          <card-component title="Players" icon="account-group" v-if="server.details">
             <p v-if="!server.details.online">Server is offline</p>
             <p v-if="server.details.players.length == 0">No players are online</p>
             <div class="columns is-multiline" v-else>
@@ -129,7 +129,7 @@ export default {
       return this.$store.state.servers.list.find(server => server.id === this.$route.params.server)
     },
     serverType() {
-      if (!this.server) return null
+      if (!this.server?.details) return "Server cannot be reached"
       if (!this.server.details.online) return 'Server Offline'
       return this.$options.AppTitles[this.server.details.appid] || 'Unknown'
     },

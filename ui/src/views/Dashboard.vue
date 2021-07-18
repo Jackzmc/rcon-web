@@ -7,7 +7,7 @@
           class="tile is-child"
           type="is-primary"
           icon="server"
-          :number="serversOnline"
+          :number="serversOnline + ' / ' + servers.list.length"
           label="Servers Online"
         />
         <card-widget
@@ -17,20 +17,7 @@
           :number="onlinePlayers"
           label="Players"
         />
-        <card-widget
-          class="tile is-child"
-          type="is-danger"
-          icon="alert-circle"
-          :number="0"
-          label="Errors"
-        />
-        <card-widget
-          class="tile is-child"
-          type="is-warning"
-          icon="alert"
-          :number="0"
-          label="Warnings"
-        />
+
       </tiles>
 
       <card-component
